@@ -1,0 +1,25 @@
+{
+  "$schema": "https://supabase.com/schemas/config/v1.json",
+  "project_id": "vahakin",
+  "auth": {
+    "site_url": "http://localhost:3000",
+    "additional_redirect_urls": [
+      "http://localhost:3000/auth/callback",
+      "http://localhost:3000/auth/callback?next=/auth/reset-password",
+      "http://localhost:3001/auth/callback",
+      "http://localhost:3001/auth/callback?next=/auth/reset-password"
+    ],
+    "email": {
+      "enable_confirmations": true,
+      "smtp": {
+        "enabled": true,
+        "host": "smtp-relay.brevo.com",
+        "port": 587,
+        "user": "c34af1001@smtp-brevo.com",
+        "pass": "env(BREVO_SMTP_KEY)",
+        "admin_email": "krishardeshana@gmail.com",
+        "sender_name": "VahanIN"
+      }
+    }
+  }
+}

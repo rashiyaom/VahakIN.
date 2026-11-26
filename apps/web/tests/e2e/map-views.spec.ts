@@ -1,0 +1,28 @@
+import {test,expect} from '@playwright/test';
+import {authenticateDemo} from './demo-auth';
+test('real street tiles, perspective controls and mobile map layout',async({page})=>{
+ test.setTimeout(60000);
+ const errors:string[]=[];page.on("pageerror",e=>errors.push(e.message));
+ const tile=page.waitForResponse(r=>r.url().includes("tiles.openfreemap.org/")&&r.url().endsWith(".pbf")&&r.ok());
+ await authenticateDemo(page.request);
+ await page.goto('/gov/monitoring');
+ const map=page.locator('.monitoring-map');
+ await expect(map.getByRole('button',{name:'Streets',exact:true})).toHaveAttribute('aria-pressed','true');
+ await expect(map.getByRole('button',{name:'2.5D',exact:true})).toBeEnabled({timeout:25000});
+ await expect(map.locator('.maplibregl-canvas')).toBeVisible();
+ await tile;
+ expect(await map.locator(".map-canvas").evaluate(e=>e.getBoundingClientRect().height)).toBeGreaterThan(250);
+ await map.getByRole('button',{name:'2.5D',exact:true}).click();
+ await expect(map.getByRole('button',{name:'2.5D',exact:true})).toHaveAttribute('aria-pressed','true');
+ await expect(map.getByText(/Building heights appear/)).toBeVisible();
+ await expect(map.getByText('Demo vehicle markers')).toBeVisible();
+ await page.waitForTimeout(2000);
+ await page.screenshot({path:'/tmp/vahanin-map-tilted.png',fullPage:true});
+ await map.getByRole('button',{name:'2D',exact:true}).click();
+ await map.getByRole('button',{name:'Recenter',exact:true}).click();
+ await page.setViewportSize({width:390,height:844});
+ await expect(map.getByRole('button',{name:'Hybrid',exact:true})).toBeVisible();
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+ await page.screenshot({path:'/tmp/vahanin-map-mobile.png',fullPage:true});
+ expect(errors).toEqual([]);
+});

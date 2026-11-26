@@ -1,0 +1,49 @@
+VahanIN live setup
+
+The linked project is sxpbvgwozrdtvjplenzd. Migrations live in supabase/migrations.
+Web credentials are in ignored apps/web/.env.local; never expose the service-role key.
+Run the website from apps/web with npm run dev.
+
+New accounts: create an account at /login/owner, confirm the email, and sign in.
+The private draft is created automatically. Claim a provisioned device, complete
+owner/vehicle/parking details, upload supporting documents, and submit to GJ-03.
+RTO staff see submitted packages; approval creates the registered vehicle/device
+link. A fresh signed heartbeat and staff installation check are separate steps.
+
+rashiyaom@gmail.com has an explicit Rajkot RTO staff grant. Create/confirm that
+account first; its verified email activates the grant. No password was assigned.
+Other public accounts cannot grant themselves government roles.
+
+Demo: use demo@gmail.com / demo@123 in the normal owner or government login form.
+Role switching is available only after that login. Fictional accounts, uploads,
+sessions and demo login limits stay in the local .data directory, outside Supabase.
+Use persistent private disk for demo storage if deploying to a hosted environment.
+
+Device inventory (from apps/web):
+node --env-file=.env.local scripts/provision-device.mjs IG-YOURDEVICE SERIALNUMBER
+Private output is saved in .provisioned with restrictive permissions. Print only
+the activation code for the owner; install the device secret in the hardware.
+POST /api/devices/heartbeat with exact UTF-8 JSON body:
+{"deviceId":"IG-YOURDEVICE","timestamp":<Unix milliseconds>,"nonce":"<new UUID>"}
+Header x-vahakin-signature is lowercase HMAC-SHA256 hex of the exact body,
+using the provisioned secret string as the HMAC key. Use HTTPS in deployment.
+Messages must be within five minutes; replayed nonces are rejected. This endpoint
+records setup connectivity only, not GPS evidence or regulatory compliance.
+
+Verification: npm run typecheck; npm test; npm run build.
+Live integration test (creates and deletes isolated fixture accounts/files):
+VAHAKIN_LIVE_TESTS=1 VAHAKIN_TEST_URL=http://localhost:3001 node --env-file=.env.local node_modules/@playwright/test/cli.js test tests/e2e/supabase-live.spec.ts
+
+Brevo SMTP is configured for Supabase Auth using the verified sender
+krishardeshana@gmail.com and display name VahanIN. The key is in ignored
+supabase/.env. Before public deployment set the site's HTTPS URL and callback URLs in supabase/config.jsonc.
+A Brevo delivery test was sent to the administrator. Current callbacks cover localhost
+ports 3000 and 3001. Government filing/VAHAN and continuous GPS ingestion are not
+connected. Routing covers Rajkot city only; it is not geographic nearest-office
+routing. Live tax assessment features stay disabled pending verified rules.
+
+Application edits use a scoped database snapshot and an atomic version-checked
+commit. Conflicting writes return a refresh/retry response rather than overwrite
+data. The global clock favors correctness for this pilot; higher fleet throughput
+will need finer-grained transactions. Storage objects are private. Submitted
+revisions and action history are immutable through the application.

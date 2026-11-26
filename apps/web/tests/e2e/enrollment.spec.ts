@@ -1,0 +1,154 @@
+import { authenticateDemo } from "./demo-auth";
+import { test, expect, type APIRequestContext } from "@playwright/test";
+
+const origin = process.env.VAHAKIN_TEST_URL || "http://localhost:3000";
+const pdf = Buffer.from("%PDF-1.4\n1 0 obj\n<</Type /Catalog>>\nendobj\ntrailer\n<</Root 1 0 R>>\n%%EOF");
+const future = (days: number) => new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Kolkata", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date(Date.now() + days * 86400000));
+async function login(request: APIRequestContext, id: string) {
+  await authenticateDemo(request);
+  const response = await request.post("/api/session", { headers: { Origin: origin }, data: id === "new" ? { mode: "new-owner" } : { mode: "demo", accountId: `demo-${id}` } });
+  expect(response.status(), await response.text()).toBe(200); return response.json();
+}
+async function state(request: APIRequestContext) { return (await request.get("/api/applications")).json(); }
+
+test("new owner completes device-to-RTO onboarding, corrections, approval and installation", async ({ page, browser }) => {
+  test.setTimeout(180000);
+  const errors: string[] = []; page.on("pageerror", e => errors.push(e.message));
+  await login(page.request, "new");
+  await page.goto("/owner/onboarding");
+  await page.waitForURL("**/owner/onboarding");
+  await expect(page.getByRole("heading", { name: "Your device", exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Use sample device details" }).click();
+  await page.getByRole("button", { name: "Claim device", exact: true }).click();
+  await expect(page.getByText(/is reserved for you/)).toBeVisible();
+  await page.getByRole("button", { name: "Run demo connection check" }).click();
+  await expect(page.getByRole("status").filter({ hasText: "Demo connection check recorded" })).toBeVisible();
+  await page.screenshot({ path: "/tmp/vahakin-enrollment-device.png", fullPage: true });
+  await page.getByRole("button", { name: "Save & continue" }).click();
+  await page.getByLabel("Your full name", { exact: true }).fill("Fictional Onboarding Owner");
+  await page.getByLabel("Mobile number", { exact: true }).fill("9876543210");
+  await page.getByLabel("Your postal address", { exact: true }).fill("Sample owner address, Rajkot city");
+  await page.getByLabel("Your PIN code", { exact: true }).fill("360001");
+  await page.getByRole("button", { name: "Save draft", exact: true }).click();
+  await expect(page.getByRole("status").filter({ hasText: "Draft saved" })).toBeVisible();
+  await page.reload();
+  await expect(page.getByLabel("Your full name", { exact: true })).toHaveValue("Fictional Onboarding Owner");
+  await page.getByRole("button", { name: "Save & continue" }).click();
+  const registration = `GJ03Q${String(Date.now()).slice(-4)}`;
+  await page.getByLabel("Vehicle registration number", { exact: true }).fill(registration);
+  await page.getByLabel("Make and model", { exact: true }).fill("Sample goods vehicle");
+  await page.getByLabel("Chassis number", { exact: true }).fill("DEMOCHASSIS2026");
+  await page.getByLabel("Manufacture year", { exact: true }).fill("2024");
+  await page.getByLabel("Tax certificate / receipt number", { exact: true }).fill("DEMO-TAX-123");
+  await page.getByLabel("Taxation authority", { exact: true }).fill("Rajkot RTO");
+  await page.getByLabel("Tax paid through", { exact: true }).fill(future(90));
+  await page.getByRole("button", { name: "Save & continue" }).click();
+  await page.getByLabel("Non-Use starts", { exact: true }).fill(future(2));
+  await page.getByLabel("Non-Use ends", { exact: true }).fill(future(20));
+  await page.getByLabel("A little more about the reason", { exact: true }).fill("Planned maintenance in the fictional workshop.");
+  await page.getByLabel("Full parking / garage address", { exact: true }).fill("Sample garage, fictional plot, Rajkot city");
+  await page.getByLabel("Parking area", { exact: true }).selectOption("Rajkot city");
+  await page.getByLabel("Parking PIN code", { exact: true }).fill("360001");
+  await expect(page.getByText("Rajkot RTO · GJ-03", { exact: true })).toBeVisible();
+  await page.screenshot({ path: "/tmp/vahakin-enrollment-parking.png", fullPage: true });
+  await page.getByRole("button", { name: "Save & continue" }).click();
+  for (const label of ["Registration certificate (RC)", "Certificate of taxation / tax receipt", "Signed Form NT", "Fitness certificate"]) {
+    await page.getByLabel(`Upload ${label}`, { exact: true }).setInputFiles({ name: "sample.pdf", mimeType: "application/pdf", buffer: pdf });
+    await expect(page.getByRole("status").filter({ hasText: `${label} uploaded.` })).toBeVisible();
+  }
+  const ownerState = await state(page.request), id = ownerState.applications[0].id, docId = ownerState.applications[0].documents[0].id;
+  const reviewerContext = await browser.newContext({ baseURL: origin }); const reviewer = await reviewerContext.newPage();
+  await login(reviewer.request, "rto");
+  expect((await state(reviewer.request)).applications.some((a: { id: string }) => a.id === id)).toBe(false);
+  expect((await reviewer.request.get(`/api/applications/documents/${docId}`)).status()).toBe(404);
+  await page.getByRole("button", { name: "Save & continue" }).click();
+  await page.getByRole("checkbox").check();
+  await page.getByRole("button", { name: "Send to Rajkot RTO" }).click();
+  await expect(page.getByRole("heading", { name: "You’re in the review queue." })).toBeVisible();
+  expect((await reviewer.request.get(`/api/applications/documents/${docId}`)).status()).toBe(200);
+  const otherContext = await browser.newContext({ baseURL: origin });
+  await login(otherContext.request, "new");
+  expect((await otherContext.request.get(`/api/applications/documents/${docId}`)).status()).toBe(404);
+  await otherContext.close();
+  await reviewer.goto("/gov/applications");
+  await reviewer.getByRole("button", { name: new RegExp(registration) }).click();
+  await reviewer.getByLabel("Message to the applicant").fill("Please add the plot number to the parking address.");
+  await reviewer.getByRole("button", { name: "Request changes", exact: true }).click();
+  await reviewer.getByRole("button", { name: "Confirm decision" }).click();
+  await expect(reviewer.getByText("Decision saved and visible to the applicant.")).toBeVisible();
+  await page.reload();
+  await expect(page.getByText("A small update is needed.")).toBeVisible();
+  await page.getByRole("button", { name: "Parking & dates", exact: false }).click();
+  await page.getByLabel("Full parking / garage address", { exact: true }).fill("Plot 12, sample garage, fictional road, Rajkot city");
+  await page.getByRole("button", { name: "Save & continue" }).click();
+  await page.getByRole("button", { name: "Save & continue" }).click();
+  await page.getByRole("checkbox").check();
+  await page.getByRole("button", { name: "Send to Rajkot RTO" }).click();
+  await expect(page.getByRole("heading", { name: "You’re in the review queue." })).toBeVisible();
+  await reviewer.reload();
+  await reviewer.getByRole("button", { name: new RegExp(registration) }).click();
+  for (const label of ["Applicant identity checked", "Ownership or representative authority checked", "Documents and declaration checked", "Parking address and office jurisdiction checked"]) await reviewer.getByLabel(label, { exact: true }).check();
+  await reviewer.getByLabel("Message to the applicant").fill("Sample documents and parking jurisdiction checked. Demo registration approved.");
+  await reviewer.getByRole("button", { name: "Approve registration", exact: true }).click();
+  await reviewer.getByRole("button", { name: "Confirm decision" }).click();
+  await expect(reviewer.getByRole("heading", { name: "Installation check", exact: true })).toBeVisible();
+  await reviewer.screenshot({ path: "/tmp/vahakin-enrollment-rto.png", fullPage: true });
+  await page.reload();
+  await expect(page.getByRole("heading", { name: "Approved. One step closer." })).toBeVisible();
+  await page.getByRole("button", { name: "Run demo connection check" }).click();
+  await expect(page.getByText("Connection status refreshed for your reviewer.")).toBeVisible();
+  await reviewer.reload(); await reviewer.getByRole("button", { name: new RegExp(registration) }).click();
+  await reviewer.getByLabel("Installation notes").fill("Fictional seal DEMO-12 and vehicle mounting checked.");
+  await reviewer.getByRole("button", { name: "Record verified installation" }).click();
+  await expect(reviewer.getByText("Installation recorded. Monitoring remains pending.")).toBeVisible();
+  const workspace = await (await page.request.get("/api/workspace")).json();
+  expect(workspace.vehicles).toHaveLength(1);
+  expect(workspace.vehicles[0]).toMatchObject({ registration, declarationStatus: "Verified · monitoring pending", monitoring: "Unavailable", deviceId: ownerState.applications[0].deviceId });
+  expect(errors).toEqual([]);
+  await reviewerContext.close();
+});
+
+test("mobile onboarding keeps draft fields accessible in both themes without overflow", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await login(page.request, "new"); await page.goto("/owner"); await page.waitForURL("**/owner/onboarding");
+  await expect(page.getByRole("heading", { name: "Your device", exact: true })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  expect(await page.locator(".enrol-main").evaluate(element => element.getBoundingClientRect().right <= innerWidth)).toBe(true);
+  await page.screenshot({ path: "/tmp/vahakin-enrollment-mobile.png", fullPage: true });
+  await page.getByRole("button", { name: /Switch to dark/ }).click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  await page.screenshot({ path: "/tmp/vahakin-enrollment-mobile-dark.png", fullPage: true });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.getByRole("button", { name: /About you/ }).click();
+  await expect(page.getByLabel("Your full name", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Save & continue" }).click();
+  await expect(page.getByRole("region", { name: "Owner enrolment" }).getByRole("alert")).toContainText("Enter the applicant’s full name");
+});
+
+test("application APIs reject unauthenticated writes, forged MIME uploads, stale versions and role escalation", async ({ request }) => {
+  expect((await request.get("/api/applications")).status()).toBe(401);
+  await login(request, "new");
+  let data = await state(request); const app = data.applications[0];
+  expect((await request.post("/api/applications", { headers: { Origin: "https://untrusted.example" }, data: { action: "start" } })).status()).toBe(403);
+  const spoof = await request.post("/api/applications/documents", { headers: { Origin: origin }, multipart: { id: app.id, version: String(app.version), kind: "rc", file: { name: "fake.pdf", mimeType: "application/pdf", buffer: Buffer.from("not a PDF") } } });
+  expect(spoof.status()).toBe(400);
+  const stale = await request.post("/api/applications", { headers: { Origin: origin }, data: { action: "save", id: app.id, version: 0, fields: app.fields, step: 1 } });
+  expect(stale.status()).toBe(409);
+  expect((await request.post("/api/applications", { headers: { Origin: origin }, data: { action: "review", id: app.id, version: app.version, decision: "approve", note: "I would like to approve myself" } })).status()).toBe(403);
+  data = await state(request); expect(data.applications[0].status).toBe("Draft");
+});
+
+test("role switching can resume the same fictional applicant and saved draft", async ({ page }) => {
+  await login(page.request, "new");
+  const initial = await state(page.request), app = initial.applications[0];
+  const response = await page.request.post("/api/applications", { headers: { Origin: origin }, data: { action: "save", id: app.id, version: app.version, step: 1, fields: { ...app.fields, fullName: "Fictional Resume Test" } } });
+  expect(response.status()).toBe(200);
+  await login(page.request, "rto");
+  await page.goto("/demo");
+  await page.locator(".recent-owner-demos .persona-card").filter({ hasText: initial.demoKit.id }).click();
+  await page.waitForURL("**/owner/onboarding");
+  await expect(page.getByLabel("Your full name", { exact: true })).toHaveValue("Fictional Resume Test");
+  expect((await state(page.request)).applications[0].id).toBe(app.id);
+  await page.goto("/login/owner");
+  await page.waitForURL("**/owner/onboarding");
+});

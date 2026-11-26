@@ -1,0 +1,29 @@
+[project]
+name = "vahakin-api"
+version = "0.1.0"
+description = "VahakIN FastAPI modular monolith and outbox worker"
+requires-python = ">=3.12"
+dependencies = [
+  "fastapi[standard]",
+  "pydantic-settings",
+  "psycopg[binary,pool]",
+  "httpx",
+  "PyJWT[crypto]",
+  "supabase",
+  "reportlab",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest",
+  "pytest-asyncio",
+  "ruff",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]

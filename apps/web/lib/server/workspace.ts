@@ -1,0 +1,40 @@
+import { can, inJurisdiction, permissionsFor, type Account } from "../permissions/access";
+import { monitoring, offices, readStore, type Vehicle, type DemoStore } from "./demo-store";
+export function workspaceFor(account:Account,params:URLSearchParams,store:DemoStore=readStore()){
+ const state=params.get("state")||"all", office=params.get("office")||"all";
+ if(state!=="all"&&account.role!=="national_admin"&&account.role!=="technical_admin"&&state!==account.state)throw new Error("This state is outside your assigned jurisdiction.");
+ if(office!=="all"&&!offices.some(o=>o.code===office&&(account.role==="national_admin"||account.role==="technical_admin"||account.role==="state_admin"&&o.state===account.state||o.code===account.office)))throw new Error("This office is outside your assigned jurisdiction.");
+ const allowed=store.vehicles.filter(v=>inJurisdiction(account,v));
+ const scoped=allowed.filter(v=>(account.role!=="technical_admin"&&account.role!=="device_technician"||v.deviceId!=="Unassigned")&&(state==="all"||v.state===state)&&(office==="all"||v.office===office));
+ const q=(params.get("q")||"").trim().toLowerCase().slice(0,100);
+ const status=params.get("status")||"all";
+ const vehicles=scoped.filter(v=>(!q||[v.registration,v.id,v.deviceId,v.declarationId,v.model,v.office,v.state].join(" ").toLowerCase().includes(q))&&(status==="all"||monitoring(v)===status));
+ const ids=new Set(vehicles.map(v=>v.id));const range=params.get("range")==="7"?7:30;const cutoff=Date.now()-range*86400000;
+ const alerts=store.alerts.filter(a=>ids.has(a.vehicleId)&&Date.parse(a.occurredAt)>=cutoff);
+ const cases=store.cases.filter(c=>ids.has(c.vehicleId)&&Date.parse(c.createdAt)>=cutoff);
+ const current=vehicles.filter(v=>monitoring(v)==="Current"&&v.declarationStatus==="Active"&&v.gpsStatus!=="Unavailable"&&v.gpsAt&&Date.now()-Date.parse(v.gpsAt)<10*60000);
+ const currentIds=new Set(current.map(v=>v.id));
+ const observed=current.filter(v=>v.review==="No suspicious activity detected"&&v.gpsAt&&Date.now()-Date.parse(v.gpsAt)<10*60000);
+ const summary={total:vehicles.length,active:vehicles.filter(v=>v.declarationStatus==="Active").length,current:current.length,stale:vehicles.filter(v=>monitoring(v)==="Stale").length,unavailable:vehicles.filter(v=>monitoring(v)==="Unavailable").length,observed:observed.length,review:vehicles.filter(v=>v.review==="Review required").length,moving:vehicles.filter(v=>v.motion==="Moving"&&monitoring(v)==="Current").length,alerts:alerts.filter(a=>a.status!=="Resolved").length,critical:alerts.filter(a=>a.severity==="Critical"&&a.status!=="Resolved").length,cases:cases.filter(c=>c.status!=="Closed").length,expiring:vehicles.filter(v=>Date.parse(v.endsAt)-Date.now()<7*86400000&&Date.parse(v.endsAt)>Date.now()).length,lowBattery:vehicles.filter(v=>v.battery!==null&&v.battery<20).length,pending:vehicles.filter(v=>v.declarationStatus==="Pending verification").length,states:new Set(vehicles.map(v=>v.state)).size,offices:new Set(vehicles.map(v=>v.office)).size};
+ function projectVehicle(v:Vehicle){const precise=can(account,"locations.read"), pii=account.role==="rto_admin"||account.role==="registration_operator"||account.role==="vehicle_owner";return {...v,ownerName:pii?v.ownerName:"Restricted",ownerId:undefined,mobile:pii?v.mobile:"Restricted",chassis:pii?v.chassis:"Restricted",parkingLat:precise?v.parkingLat:null,parkingLng:precise?v.parkingLng:null,lat:precise?v.lat:null,lng:precise?v.lng:null,parking:precise?v.parking:"Restricted",accuracy:precise?v.accuracy:null,speed:precise?v.speed:null,geofence:v.gpsStatus==="Unavailable"||!v.gpsAt||Date.now()-Date.parse(v.gpsAt)>10*60000?"Unknown":v.geofence,locationStatus:v.gpsStatus==="Unavailable"?"Unavailable":!v.gpsAt?"Unavailable":Date.now()-Date.parse(v.gpsAt)>10*60000?"Historical":"Current",monitoring:monitoring(v),connectivity:monitoring(v)==="Unavailable"?"Offline":monitoring(v)==="Stale"?"Unknown":"Online",motion:monitoring(v)==="Current"?v.motion:"Unknown",review:!currentIds.has(v.id)&&v.review==="No suspicious activity detected"?"Monitoring unavailable":v.review};}
+ const isDeviceOnly=account.role==="technical_admin"||account.role==="device_technician";
+ const safeSummary=isDeviceOnly?{...summary,current:vehicles.filter(v=>monitoring(v)==="Current").length,active:0,observed:0,review:0,moving:0,alerts:0,critical:0,cases:0,expiring:0,pending:0}:summary;
+ return {
+  account:{...account,permissions:permissionsFor(account)},summary:safeSummary,
+  classificationChanges:(can(account,"vehicles.draft")||can(account,"vehicles.approve"))?(store.classificationChanges??[]).filter(c=>ids.has(c.vehicleId)):[],
+  vehicles:can(account,"vehicles.read")?vehicles.map(projectVehicle):[],
+  devices:can(account,"devices.read")?vehicles.filter(v=>v.deviceId!=="Unassigned").map(v=>({id:v.deviceId,vehicleId:v.id,registration:can(account,"vehicles.read")?v.registration:"Restricted",state:v.state,office:v.office,hardware:"ESP32-S3 · MPU6050 · GPS",firmware:v.firmware,assignment:"Assigned",battery:v.battery,voltage:v.voltage,signal:v.signal,heartbeat:v.heartbeat,gpsAt:v.gpsAt,tamper:v.tamper,connectivity:monitoring(v)==="Unavailable"?"Offline":monitoring(v)==="Stale"?"Unknown":"Online",monitoring:monitoring(v),maintenance:store.maintenance.filter(m=>m.deviceId===v.deviceId)})):[],
+  alerts:can(account,"alerts.read")?alerts.map(a=>({...a,registration:vehicles.find(v=>v.id===a.vehicleId)?.registration??"",description:a.description,assignee:account.role==="vehicle_owner"?null:a.assignee})):[],
+  cases:can(account,"cases.read")?cases.map(c=>({...c,registration:vehicles.find(v=>v.id===c.vehicleId)?.registration??""})):[],
+  requests:can(account,"requests.read")?store.requests.filter(r=>ids.has(r.vehicleId)&&(account.role!=="vehicle_owner"||r.createdBy===account.id)).map(r=>({...r,registration:vehicles.find(v=>v.id===r.vehicleId)?.registration??""})):[],
+  employees:can(account,"employees.read")?store.accounts.filter(a=>a.role!=="vehicle_owner"&&a.role!=="technical_admin"&&(account.role==="national_admin"?a.role==="state_admin":account.role==="state_admin"?a.role==="rto_admin"&&a.state===account.state:a.office===account.office)).map(a=>({...a,workload:store.cases.filter(c=>c.assignee===a.id&&c.status!=="Closed").length})):[],
+  investigators:can(account,"cases.assign")?store.accounts.filter(a=>a.role==="enforcement_officer"&&a.office===account.office&&a.status==="Active").map(a=>({id:a.id,name:a.name})):[],
+  audit:can(account,"audit.read")?store.audit.filter(a=>account.role==="technical_admin"?a.actor===account.id:account.role==="national_admin"?true:account.role==="state_admin"?a.state===account.state:a.office===account.office).slice(-100).reverse():[],
+  offices:can(account,"offices.read")?offices.filter(o=>vehicles.some(v=>v.office===o.code)).map(o=>{const vs=vehicles.filter(v=>v.office===o.code);return {...o,vehicles:vs.length,active:vs.filter(v=>v.declarationStatus==="Active").length,coverage:vs.filter(v=>currentIds.has(v.id)).length,review:vs.filter(v=>v.review==="Review required").length,unavailable:vs.filter(v=>monitoring(v)!=="Current").length};}):[],
+  states:can(account,"states.read")?[...new Set(vehicles.map(v=>v.state))].map(name=>{const vs=vehicles.filter(v=>v.state===name);return {name,vehicles:vs.length,offices:new Set(vs.map(v=>v.office)).size,coverage:vs.filter(v=>currentIds.has(v.id)).length,review:vs.filter(v=>v.review==="Review required").length};}):[],
+  simulatorEvents:can(account,"telemetry.simulate")?(store.events??[]).slice(-20).reverse().map(e=>({id:e.id,deviceId:e.deviceId,eventAt:e.eventAt,receivedAt:e.receivedAt,motion:e.motion,source:e.source,ruleVersion:e.ruleVersion})):[],
+  scopeOptions:{states:can(account,"states.read")?[...new Set(allowed.map(v=>v.state))]:[],offices:can(account,"offices.read")?offices.filter(o=>allowed.some(v=>v.office===o.code)).map(o=>({code:o.code,city:o.city,state:o.state})):[]},
+  source:account.mode==="live"?"MANUAL" as const:"MOCK" as const,refreshedAt:new Date().toISOString(),periodDays:range,
+ };
+}
+export type WorkspaceData=ReturnType<typeof workspaceFor>;
