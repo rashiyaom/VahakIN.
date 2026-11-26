@@ -1,4 +1,4 @@
-VahanIN live setup
+VahakIN live setup
 
 The linked project is sxpbvgwozrdtvjplenzd. Migrations live in supabase/migrations.
 Web credentials are in ignored apps/web/.env.local; never expose the service-role key.
@@ -34,10 +34,9 @@ Verification: npm run typecheck; npm test; npm run build.
 Live integration test (creates and deletes isolated fixture accounts/files):
 VAHAKIN_LIVE_TESTS=1 VAHAKIN_TEST_URL=http://localhost:3001 node --env-file=.env.local node_modules/@playwright/test/cli.js test tests/e2e/supabase-live.spec.ts
 
-Brevo SMTP is configured for Supabase Auth using the verified sender
-krishardeshana@gmail.com and display name VahanIN. The key is in ignored
-supabase/.env. Before public deployment set the site's HTTPS URL and callback URLs in supabase/config.jsonc.
-A Brevo delivery test was sent to the administrator. Current callbacks cover localhost
+Before public deployment configure Supabase Auth SMTP for arbitrary recipients
+and set the site's HTTPS URL and callback URLs in supabase/config.jsonc.
+Email delivery to real inboxes was not tested. Current callbacks cover localhost
 ports 3000 and 3001. Government filing/VAHAN and continuous GPS ingestion are not
 connected. Routing covers Rajkot city only; it is not geographic nearest-office
 routing. Live tax assessment features stay disabled pending verified rules.
