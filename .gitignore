@@ -56,3 +56,20 @@ apps/web/.next-mail-check/
 apps/web/test-results-mail/
 
 apps/web/public/vendor/maplibre/
+
+apps/web/test-results-audit/
+
+apps/web/.next-audit/
+
+# Hardware demo secrets and local compiler output
+firmware/hotspot_imu_demo/config.local.h
+firmware/hotspot_imu_demo/build/
+
+apps/web/.next-imu/
+
+apps/web/.next-imu-build/
+
+firmware/plus_watch_demo/config.local.h
+firmware/plus_watch_demo/build/
+apps/web/.local-https/
+apps/web/.next-phone/

@@ -1,3 +1,4 @@
+export type DeviceTier = "BASIC" | "PLUS";
 export type ApplicationStatus = "Draft" | "Submitted" | "Under review" | "Changes requested" | "Rejected" | "Approved";
 export type DocumentKind = "rc" | "tax" | "fitness" | "authority" | "nonuse" | "supporting" | "photo";
 
@@ -22,13 +23,16 @@ export interface ApplicationRevision {
   deviceId: string; office: string; policyVersion: string;
 }
 export interface EnrollmentApplication {
+  deviceTier?: DeviceTier;
   id: string; ownerId: string; status: ApplicationStatus; version: number; step: number;
   fields: EnrollmentFields; deviceId: string | null; office: string | null;
   createdAt: string; updatedAt: string; submittedAt: string | null;
   documents: EnrollmentDocument[]; history: ApplicationAction[]; revisions: ApplicationRevision[];
+  ownerMountedAt?: string | null; mountingLocation?: "Car dashboard";
   vehicleId: string | null; approvedBy: string | null; installationVerifiedAt: string | null;
 }
 export interface EnrollmentDevice {
+  tier?: DeviceTier;
   id: string; serial: string; claimHash: string; reservedBy: string | null;
   applicationId: string | null; assignedVehicleId: string | null;
   source: "DEMO" | "HARDWARE"; lastSetupAt: string | null;

@@ -1,7 +1,7 @@
 import { beforeEach, afterEach, describe, expect, it, vi } from "vitest";
 import { randomUUID } from "node:crypto";
 import { demoAccounts, type DemoStore, type Vehicle, type DemoEvent } from "../../lib/server/demo-store";
-import { applyTaxAction, ensureTaxState, syncTaxEvidence, taxProjection, attachDocument, documentFor, hash } from "../../lib/server/tax-service";
+import { applyTaxAction, ensureTaxState, syncTaxEvidence, taxProjection, attachDocument, documentFor, hash, integrationMode } from "../../lib/server/tax-service";
 import { calculateTax, parsePaise } from "../../lib/tax/calculator";
 import { ingestDemoEvent } from "../../lib/server/telemetry";
 import type { Account } from "../../lib/permissions/access";
@@ -63,4 +63,14 @@ describe("revision and later evidence safeguards",()=>{
  it("rechecks evidence integrity at approval",()=>{const f=fixture(),assessmentId=f.prepare();f.act("rto","review",{assessmentId});f.act("manager","requestResponse");const response=f.act("owner","respond",{kind:"Explanation"});f.act("officer","reviewResponse",{responseId:response.acknowledgementId});f.store.events![0].speed=99;expect(()=>f.act("tax-authority","approve",{assessmentId})).toThrow("integrity");});
  it("considers a matching permission recorded after detection",()=>{const f=fixture(),assessmentId=f.prepare();f.act("rto","review",{assessmentId});f.act("manager","requestResponse");const response=f.act("owner","respond",{kind:"Permission reference"});f.act("officer","reviewResponse",{responseId:response.acknowledgementId});f.store.requests.push({id:"late-permission",vehicleId:f.vehicle.id,status:"Authorized in demo",authorization:{mode:"DEMO",conditionsVerified:true,reference:"DEMO-PERMISSION",validFrom:"2026-11-26T00:00:00Z",validTo:"2026-11-27T00:00:00Z"}} as typeof f.store.requests[number]);expect(()=>f.act("tax-authority","approve",{assessmentId})).toThrow("matching permission");expect(f.store.tax!.assessments[0].status).toBe("Under review");});
  it("does not reopen dismissed cases through a new finding",()=>{const f=fixture();f.move();f.act("rto","dismiss");expect(()=>f.act("rto","finding")).toThrow("closed");});
+});
+
+it("isolates credential-authenticated demo processing from live integration settings",()=>{
+ vi.stubEnv("TRANSPORT_RECORDS_MODE","MANUAL");
+ try {
+  const account=demoAccounts.find(a=>a.role==="rto_admin")!;
+  expect(integrationMode({...account,mode:"demo"})).toBe("DEMO");
+  expect(integrationMode({...account,mode:"live"})).toBe("MANUAL");
+  expect(integrationMode()).toBe("MANUAL");
+ } finally { vi.unstubAllEnvs(); }
 });

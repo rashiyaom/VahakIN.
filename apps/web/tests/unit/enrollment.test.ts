@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { applicationView, claimDevice, createApplicant, demoActivationCode, editableApplication, enrollmentState, getApplication, reviewApplication, saveDraft, setupDemoDevice, submitApplication, verifyDemoInstallation } from "../../lib/server/enrollment";
+import { applicationView, confirmDashboardMounting, claimDevice, createApplicant, demoActivationCode, editableApplication, enrollmentState, getApplication, reviewApplication, saveDraft, setupDemoDevice, submitApplication, verifyDemoInstallation } from "../../lib/server/enrollment";
 import { demoAccounts, type DemoStore } from "../../lib/server/demo-store";
 import { emptyFields, type EnrollmentDocument, type EnrollmentFields } from "../../lib/enrollment/types";
 import { requiredDocuments, routeOffice, indiaToday, reviewFlags } from "../../lib/enrollment/policy";
@@ -59,6 +59,10 @@ describe("owner application lifecycle", () => {
     expect(store.vehicles).toHaveLength(1);
     expect(store.vehicles[0]).toMatchObject({ ownerId: owner.id, ownerVerified: true, deviceId: owner.demoDeviceId, office: "GJ-03", heartbeat: null, declarationStatus: "Verified · installation pending" });
     expect(() => reviewApplication(store, reviewer, app.id, app.version, "approve", "Repeat approval rejected", checks)).toThrow("not awaiting");
+    expect(() => verifyDemoInstallation(store, reviewer, app.id, app.version, "Demo mounting and seal checked")).toThrow("confirm mounting");
+    expect(() => confirmDashboardMounting(store, reviewer, app.id, app.version)).toThrow("Only the owner");
+    confirmDashboardMounting(store, owner, app.id, app.version);
+    expect(app.mountingLocation).toBe("Car dashboard");
     expect(() => verifyDemoInstallation(store, reviewer, app.id, app.version, "Demo mounting and seal checked")).toThrow("fresh demo");
     setupDemoDevice(store, owner, app.id, app.version);
     verifyDemoInstallation(store, reviewer, app.id, app.version, "Demo mounting and seal checked");

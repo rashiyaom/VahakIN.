@@ -1,3 +1,4 @@
+import { requestOrigin } from "./origin";
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { timingSafeEqual } from "node:crypto";
@@ -37,7 +38,7 @@ export async function POST(request:Request){
   if(!supabaseConfigured())return fail("Account service is not configured.",503);
   if(supabaseConfigured()&&!await limitAttempts(`auth:${tokenHash(email??"password-update")}`,12,900))return fail("Too many attempts. Please try again in 15 minutes.",429);
 
-  const client=await authClient(),origin=new URL(request.url).origin;
+  const client=await authClient(),origin=requestOrigin(request);
   if(form.action==="recover"){
    const {error}=await client.auth.resetPasswordForEmail(email!,{redirectTo:`${origin}/auth/callback?next=/auth/reset-password`});
    if(error)return fail("Unable to send a reset email right now. Please try again later.");

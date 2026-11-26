@@ -14,4 +14,4 @@ export async function currentAccount(){
  return liveAccount(data.user.id);
 }
 export function createSession(accountId:string){return withStoreTransaction(store=>{const account=store.accounts.find(a=>a.id===accountId&&a.status==="Active");if(!account)return null;const token=randomBytes(32).toString("hex");store.sessions=store.sessions.filter(s=>s.expires>Date.now());store.sessions.push({hash:tokenHash(token),accountId,expires:Date.now()+4*60*60*1000});return {account,token};});}
-export function sameOrigin(request:Request){const origin=request.headers.get("origin");return origin!==null&&origin===new URL(request.url).origin;}
+export { requestHasSameOrigin as sameOrigin } from "./origin";

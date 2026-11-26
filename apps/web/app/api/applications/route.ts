@@ -1,7 +1,7 @@
 import { accountStore, accountTransaction, limitAttempts } from "@/lib/server/live-store";
 import { NextResponse } from "next/server";
 import { currentAccount, sameOrigin } from "@/lib/server/session";
-import { applicationView, claimDevice, editableApplication, EnrollmentError, enrollmentState, reviewApplication, saveDraft, setupDemoDevice, startApplication, submitApplication, touch, verifyDemoInstallation } from "@/lib/server/enrollment";
+import { applicationView, confirmDashboardMounting, claimDevice, editableApplication, EnrollmentError, enrollmentState, reviewApplication, saveDraft, setupDemoDevice, startApplication, submitApplication, touch, verifyDemoInstallation } from "@/lib/server/enrollment";
 import { boundedBody, enrollmentFailure } from "@/lib/server/enrollment-http";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -40,7 +40,7 @@ export async function POST(request: Request) {
           if (app.submittedAt) throw new EnrollmentError("Contact the office to change a device after submission.", 409);
           const device = enrollmentState(store).devices.find(d => d.id === app.deviceId && d.applicationId === app.id);
           if (device) { device.reservedBy = null; device.applicationId = null; device.lastSetupAt = null; }
-          app.deviceId = null; touch(app); break;
+          app.deviceId = null; app.deviceTier = undefined; touch(app); break;
         }
         case "remove-document": {
           const app = editableApplication(store, account, input.id, input.version);
@@ -51,6 +51,7 @@ export async function POST(request: Request) {
         case "submit": submitApplication(store, account, input.id, input.version); break;
         case "review": reviewApplication(store, account, input.id, input.version, String(input.decision ?? ""), String(input.note ?? ""), input.checks); break;
         case "demo-setup": if(account.mode === "live") throw new EnrollmentError("Simulated setup is unavailable for live devices.",403); setupDemoDevice(store, account, input.id, input.version); break;
+        case "confirm-mounting": confirmDashboardMounting(store, account, input.id, input.version); break;
         case "verify-installation":
         case "demo-install": if(input.action === "demo-install" && account.mode === "live") throw new EnrollmentError("Use verified installation for live devices.",403); verifyDemoInstallation(store, account, input.id, input.version, String(input.note ?? "")); break;
         default: throw new EnrollmentError("Unknown application action.");

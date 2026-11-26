@@ -71,7 +71,7 @@ export function applicationView(store: DemoStore, account: Account) {
     return { ...a, fields: revision.fields, deviceId: revision.deviceId, documents: a.documents.filter(d => submittedDocuments.has(d.id)) };
   });
   const ids = new Set(applications.map(a => a.deviceId));
-  return { applications: visible, devices: state.devices.filter(d => ids.has(d.id)).map(({ id, serial, lastSetupAt, source }) => ({ id, serial, lastSetupAt, source })),
+  return { applications: visible, devices: state.devices.filter(d => ids.has(d.id)).map(({ id, serial, lastSetupAt, source, tier }) => ({ id, serial, lastSetupAt, source, tier: tier ?? "BASIC" })),
     demoKit: account.role === "vehicle_owner" && account.demoDeviceId ? { id: account.demoDeviceId, code: demoActivationCode(account.demoDeviceId) } : null };
 }
 export function saveDraft(store: DemoStore, account: Account, id: string, version: number, raw: unknown, step: number) {
@@ -92,7 +92,7 @@ export function claimDevice(store: DemoStore, account: Account, id: string, vers
   if (device.assignedVehicleId || device.applicationId && device.applicationId !== app.id) throw new EnrollmentError("This device is already claimed. Contact support if it belongs to you.", 409);
   if (app.deviceId && app.deviceId !== device.id) throw new EnrollmentError("Release your current device before claiming another.", 409);
   if (app.deviceId === device.id) return app;
-  device.reservedBy = account.id; device.applicationId = app.id; app.deviceId = device.id;
+  device.reservedBy = account.id; device.applicationId = app.id; app.deviceId = device.id; app.deviceTier = device.tier ?? "BASIC";
   touch(app); recordAction(store, account, app, "Device claimed", `${device.id} reserved for this application. Installation is still to be verified.`);
   return app;
 }
@@ -121,6 +121,7 @@ function registerApprovedVehicle(store: DemoStore, account: Account, app: Enroll
   if (device.assignedVehicleId || device.applicationId !== app.id) throw new EnrollmentError("Device assignment changed. Resolve it before approval.", 409);
   if (store.vehicles.some(v => normalizeRegistration(v.registration) === normalizeRegistration(f.registration))) throw new EnrollmentError("This vehicle is already registered.", 409);
   const vehicle: Vehicle = {
+    deviceTier: device.tier ?? "BASIC",
     id: `v-${randomUUID()}`, registration: normalizeRegistration(f.registration), state: "Gujarat", office: app.office!, district: f.district,
     ownerId: app.ownerId, ownerName: f.capacity === "Registered owner" ? f.fullName : f.registeredOwner, ownerVerified: true, mobile: f.mobile,
     category: f.category, model: f.model, fuel: f.fuel, year: Number(f.year), chassis: f.chassis, source: account.mode === "live" ? "MANUAL" : "MOCK", verification: account.mode === "live" ? "Reviewed by RTO" : "Reviewed in demo",
@@ -162,10 +163,20 @@ export function setupDemoDevice(store: DemoStore, account: Account, id: string, 
   recordAction(store, account, app, "Demo connection check", "Simulated setup heartbeat only. No physical device connection or GPS verification.");
   return app;
 }
+export function confirmDashboardMounting(store: DemoStore, account: Account, id: string, version: number) {
+  const app = getApplication(store, account, id); checkVersion(app, version);
+  if (account.role !== "vehicle_owner" || app.ownerId !== account.id) throw new EnrollmentError("Only the owner can confirm mounting.", 403);
+  if (app.status !== "Approved" || !app.vehicleId) throw new EnrollmentError("Registration approval is required before mounting confirmation.", 409);
+  if (app.ownerMountedAt) return app;
+  app.ownerMountedAt = new Date().toISOString(); app.mountingLocation = "Car dashboard";
+  touch(app); recordAction(store, account, app, "Owner confirmed dashboard mounting", "Owner reports the device securely mounted on the car dashboard. Independent installation verification remains required.");
+  return app;
+}
 export function verifyDemoInstallation(store: DemoStore, account: Account, id: string, version: number, note: string) {
   const app = getApplication(store, account, id); checkVersion(app, version);
   if (!can(account, "applications.review") || app.ownerId === account.id) throw new EnrollmentError("An independent RTO reviewer is required.", 403);
   if (app.status !== "Approved" || !app.vehicleId || app.installationVerifiedAt) throw new EnrollmentError("Installation is not awaiting verification.", 409);
+  if (!app.ownerMountedAt) throw new EnrollmentError("Ask the owner to confirm mounting on the car dashboard first.", 409);
   const device = enrollmentState(store).devices.find(d => d.id === app.deviceId);
   if (!device?.lastSetupAt || Date.now() - Date.parse(device.lastSetupAt) > 30 * 60000) throw new EnrollmentError(account.mode === "live" ? "A recent authenticated device heartbeat is required before installation can be verified." : "Ask the owner to run a fresh demo connection check first.");
   if (note.trim().length < 10 || note.length > 2000) throw new EnrollmentError("Record installation and seal details (10–2,000 characters).");

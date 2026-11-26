@@ -33,12 +33,19 @@ export async function POST(request:Request){
  if(!sameOrigin(request))return failure("Invalid request origin.",403);
  const account=await currentAccount();if(!account)return failure("Please sign in to continue.",401);
  const input=await request.json().catch(()=>null);if(!input||typeof input.action!=="string")return failure("Invalid operation.");
- const required:Record<string,Permission>={acknowledge:"alerts.acknowledge",assign:"cases.assign",note:"cases.note",enrol:"vehicles.draft",approve:"vehicles.approve",request:"requests.create",reviewRequest:"requests.review",simulate:"telemetry.simulate",classify:"vehicles.draft",approveClassification:"vehicles.approve",maintenance:"devices.maintain"};
+ const required:Record<string,Permission>={geofence:"geofences.manage",acknowledge:"alerts.acknowledge",assign:"cases.assign",note:"cases.note",enrol:"vehicles.draft",approve:"vehicles.approve",request:"requests.create",reviewRequest:"requests.review",simulate:"telemetry.simulate",classify:"vehicles.draft",approveClassification:"vehicles.approve",maintenance:"devices.maintain"};
  if(!required[input.action]||!can(account,required[input.action]))return failure("Your account does not have permission for this action.",403);
  try { return await accountTransaction(account,store=>{const now=new Date().toISOString();
  const scopedVehicle=(id:unknown)=>typeof id==="string"?store.vehicles.find(v=>v.id===id&&inJurisdiction(account,v)):undefined;
  try{
-  if(input.action==="classify"){
+  if(input.action==="geofence"){
+   const fields=z.object({vehicleId:z.string(),version:z.number().int().nonnegative(),enabled:z.boolean(),lat:z.number().finite().min(-85).max(85),lng:z.number().finite().min(-180).max(180),radiusM:z.number().int().min(50).max(5000)}).parse(input);
+   const vehicle=scopedVehicle(fields.vehicleId);if(!vehicle)return failure("Vehicle not found in your authorized scope.",404);
+   if((vehicle.geofenceConfig?.version??0)!==fields.version)return failure("Geofence changed. Refresh before saving.",409);
+   vehicle.geofenceConfig={enabled:fields.enabled,lat:fields.lat,lng:fields.lng,radiusM:fields.radiusM,version:fields.version+1,updatedAt:now};
+   vehicle.fenceCandidate=undefined;vehicle.fenceDistanceM=undefined;vehicle.geofence="Unknown";
+   appendAudit(store,account,"Parking geofence updated",vehicle.id,`${fields.enabled?"Enabled":"Disabled"} ${fields.radiusM} m circle at ${fields.lat}, ${fields.lng}; two fresh location fixes required.`);
+  }else if(input.action==="classify"){
    const vehicle=scopedVehicle(input.vehicleId);if(!vehicle)return failure("Vehicle not found in your authorized scope.",404);
    const optionalNumber=z.preprocess(v=>v===""||v===undefined?null:v,z.coerce.number().int().positive().max(100000).nullable());
    const fields=z.object({classification:z.enum(["Goods carrier","Passenger bus","Light commercial"]),ladenWeightKg:optionalNumber,unladenWeightKg:optionalNumber,seats:optionalNumber,permitCategory:z.string().trim().max(100),certificate:z.string().trim().max(160)}).parse(input.fields);

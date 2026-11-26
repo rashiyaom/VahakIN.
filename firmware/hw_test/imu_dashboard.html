@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>VahakIN · ESP32-S3 Hardware Monitor</title>
+<style>
+  :root {
+    --bg:#0f1117; --surface:#1a1d27; --card:#21263a;
+    --accent:#4ade80; --warn:#facc15; --err:#f87171;
+    --text:#e2e8f0; --muted:#64748b; --border:#2d3748;
+    --accel:#60a5fa; --gyro:#a78bfa; --temp:#fb923c;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;min-height:100vh;padding:24px 16px}
+  h1{font-size:1.3rem;font-weight:700;letter-spacing:-.5px;margin-bottom:4px}
+  .sub{color:var(--muted);font-size:.82rem;margin-bottom:24px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-bottom:24px}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 20px}
+  .card-title{font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:12px}
+  .chip{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:999px;font-size:.78rem;font-weight:600;margin-bottom:4px}
+  .chip.ok{background:#14532d;color:#4ade80}
+  .chip.fail{background:#450a0a;color:#f87171}
+  .chip.pending{background:#1e293b;color:#94a3b8}
+  .dot{width:8px;height:8px;border-radius:50%;background:currentColor}
+
+  /* Gauges */
+  .gauge-row{display:flex;flex-direction:column;gap:10px}
+  .gauge{position:relative}
+  .gauge-label{display:flex;justify-content:space-between;font-size:.74rem;margin-bottom:3px}
+  .gauge-label span:first-child{color:var(--muted)}
+  .gauge-track{height:7px;border-radius:999px;background:#1e293b;overflow:hidden}
+  .gauge-fill{height:100%;border-radius:999px;transition:width .15s ease,background .3s}
+
+  /* Value cards */
+  .val-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .val-box{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 10px;text-align:center}
+  .val-axis{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:4px}
+  .val-num{font-size:1.2rem;font-weight:700;font-variant-numeric:tabular-nums;transition:color .3s}
+
+  /* Sparkline canvas */
+  canvas{display:block;width:100%;height:90px;border-radius:8px;background:var(--surface)}
+
+  /* Status bar */
+  .status-bar{display:flex;align-items:center;gap:8px;font-size:.8rem;padding:10px 16px;background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:24px}
+  .status-dot{width:9px;height:9px;border-radius:50%;background:var(--muted);flex-shrink:0}
+  .status-dot.live{background:var(--accent);box-shadow:0 0 8px var(--accent)}
+  .status-dot.error{background:var(--err);box-shadow:0 0 8px var(--err)}
+
+  /* Serial input */
+  .serial-box{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 20px;margin-bottom:24px}
+  .serial-box textarea{width:100%;background:#0d1117;border:1px solid var(--border);border-radius:8px;color:var(--accent);font-family:'Fira Code','Courier New',monospace;font-size:.75rem;padding:10px;resize:vertical;min-height:120px;outline:none;line-height:1.6}
+  .serial-box textarea:focus{border-color:var(--accent)}
+  .serial-box p{font-size:.72rem;color:var(--muted);margin-top:6px}
+  .btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;border:none;cursor:pointer;font-size:.8rem;font-weight:600;transition:opacity .15s}
+  .btn-primary{background:#166534;color:#bbf7d0}
+  .btn-secondary{background:var(--card);color:var(--text);border:1px solid var(--border)}
+  .btn:hover{opacity:.85}
+  .btn-row{display:flex;gap:8px;margin-bottom:8px}
+
+  /* Raw log */
+  #rawlog{max-height:150px;overflow-y:auto;background:#0d1117;border:1px solid var(--border);border-radius:8px;padding:8px;font-family:monospace;font-size:.7rem;color:#94a3b8;line-height:1.6;margin-top:8px}
+
+  .footer{text-align:center;font-size:.72rem;color:var(--muted);margin-top:32px}
+</style>
+</head>
+<body>
+
+<h1>🛰 VahakIN · ESP32-S3 Hardware Monitor</h1>
+<p class="sub">Real-time IMU + GSM module status · 10 Hz refresh</p>
+
+<!-- Status bar -->
+<div class="status-bar">
+  <div class="status-dot" id="connDot"></div>
+  <span id="connLabel">Waiting for data…</span>
+  <span style="margin-left:auto;color:var(--muted)" id="pktCount">0 packets</span>
+</div>
+
+<!-- Device chips -->
+<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr));margin-bottom:16px">
+  <div class="card" style="padding:14px 18px">
+    <div class="card-title">Detected Devices</div>
+    <div id="chip_imu" class="chip pending"><span class="dot"></span>MPU-6050 IMU</div><br/>
+    <div id="chip_sim" class="chip pending" style="margin-top:6px"><span class="dot"></span>SIM800L</div><br/>
+    <div id="chip_a6"  class="chip pending" style="margin-top:6px"><span class="dot"></span>A6 NEO GSM</div>
+  </div>
+  <div class="card" style="padding:14px 18px">
+    <div class="card-title">Board Info</div>
+    <div style="font-size:.8rem;line-height:1.9;color:var(--text)">
+      <b>Chip:</b> ESP32-S3 (Espressif)<br/>
+      <b>Port:</b> /dev/cu.usbmodem101<br/>
+      <b>Interface:</b> USB JTAG/Serial<br/>
+      <b>UART baud:</b> 115200
+    </div>
+  </div>
+  <div class="card" style="padding:14px 18px">
+    <div class="card-title">IMU Temperature</div>
+    <div id="tempVal" style="font-size:2.2rem;font-weight:700;color:var(--temp)">—</div>
+    <div style="font-size:.75rem;color:var(--muted);margin-top:4px">MPU-6050 die temperature</div>
+  </div>
+</div>
+
+<!-- Accel + Gyro values -->
+<div class="grid">
+  <div class="card">
+    <div class="card-title">⚡ Accelerometer (g)</div>
+    <div class="val-grid" style="margin-bottom:14px">
+      <div class="val-box"><div class="val-axis" style="color:var(--accel)">X</div><div class="val-num" id="ax" style="color:var(--accel)">—</div></div>
+      <div class="val-box"><div class="val-axis" style="color:var(--accel)">Y</div><div class="val-num" id="ay" style="color:var(--accel)">—</div></div>
+      <div class="val-box"><div class="val-axis" style="color:var(--accel)">Z</div><div class="val-num" id="az" style="color:var(--accel)">—</div></div>
+    </div>
+    <div class="gauge-row">
+      <div class="gauge">
+        <div class="gauge-label"><span>AX</span><span id="g_ax_v">0</span></div>
+        <div class="gauge-track"><div class="gauge-fill" id="g_ax" style="width:50%;background:var(--accel)"></div></div>
+      </div>
+      <div class="gauge">
+        <div class="gauge-label"><span>AY</span><span id="g_ay_v">0</span></div>
+        <div class="gauge-track"><div class="gauge-fill" id="g_ay" style="width:50%;background:var(--accel)"></div></div>
+      </div>
+      <div class="gauge">
+        <div class="gauge-label"><span>AZ</span><span id="g_az_v">0</span></div>
+        <div class="gauge-track"><div class="gauge-fill" id="g_az" style="width:50%;background:var(--accel)"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🌀 Gyroscope (°/s)</div>
+    <div class="val-grid" style="margin-bottom:14px">
+      <div class="val-box"><div class="val-axis" style="color:var(--gyro)">X</div><div class="val-num" id="gx" style="color:var(--gyro)">—</div></div>
+      <div class="val-box"><div class="val-axis" style="color:var(--gyro)">Y</div><div class="val-num" id="gy" style="color:var(--gyro)">—</div></div>
+      <div class="val-box"><div class="val-axis" style="color:var(--gyro)">Z</div><div class="val-num" id="gz" style="color:var(--gyro)">—</div></div>
+    </div>
+    <div class="gauge-row">
+      <div class="gauge">
+        <div class="gauge-label"><span>GX</span><span id="g_gx_v">0</span></div>
+        <div class="gauge-track"><div class="gauge-fill" id="g_gx" style="width:50%;background:var(--gyro)"></div></div>
+      </div>
+      <div class="gauge">
+        <div class="gauge-label"><span>GY</span><span id="g_gy_v">0</span></div>
+        <div class="gauge-track"><div class="gauge-fill" id="g_gy" style="width:50%;background:var(--gyro)"></div></div>
+      </div>
+      <div class="gauge">
+        <div class="gauge-label"><span>GZ</span><span id="g_gz_v">0</span></div>
+        <div class="gauge-track"><div class="gauge-fill" id="g_gz" style="width:50%;background:var(--gyro)"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Sparkline chart -->
+<div class="card" style="margin-top:16px">
+  <div class="card-title">📈 Accelerometer Trend (last 100 samples)</div>
+  <canvas id="spark" height="90"></canvas>
+  <div style="display:flex;gap:16px;margin-top:8px;font-size:.72rem;color:var(--muted)">
+    <span><span style="color:var(--accel)">■</span> AX</span>
+    <span><span style="color:#34d399">■</span> AY</span>
+    <span><span style="color:#f9a8d4)">■</span> AZ</span>
+  </div>
+</div>
+
+<!-- Serial input / Web Serial API -->
+<div class="serial-box" style="margin-top:16px">
+  <div class="card-title">🔌 Data Source</div>
+  <div class="btn-row">
+    <button class="btn btn-primary" id="btnSerial" onclick="connectSerial()">Connect Web Serial</button>
+    <button class="btn btn-secondary" onclick="togglePaste()">📋 Paste JSON manually</button>
+    <button class="btn btn-secondary" onclick="clearData()">🗑 Clear</button>
+  </div>
+  <div id="pasteArea" style="display:none">
+    <textarea id="jsonInput" placeholder='Paste raw JSON lines here, e.g.:
+{"imu":{"ok":true,"ax":-0.012,"ay":0.004,"az":0.998,"gx":0.21,"gy":-0.14,"gz":0.07,"temp":28.3},"sim800":true,"a6":false,"ms":12345}'
+      oninput="parsePaste(this.value)"></textarea>
+    <p>Or drag a serial log .txt file here.</p>
+  </div>
+  <p style="margin-top:6px">Web Serial requires Chrome/Edge. Grant access to <code>/dev/cu.usbmodem101</code> at 115200 baud.</p>
+  <div id="rawlog"></div>
+</div>
+
+<div class="footer">VahakIN · ESP32-S3 Hardware Test · © 2026</div>
+
+<script>
+// ── Data store ───────────────────────────────────────────────────────────────
+const MAX_PTS = 100;
+const history = { ax:[], ay:[], az:[] };
+let pktCount = 0;
+let serialPort = null, serialReader = null;
+
+// ── DOM refs ─────────────────────────────────────────────────────────────────
+const $ = id => document.getElementById(id);
+const canvas = $('spark');
+const ctx = canvas.getContext('2d');
+
+function resize() {
+  canvas.width  = canvas.offsetWidth * devicePixelRatio;
+  canvas.height = canvas.offsetHeight * devicePixelRatio;
+}
+window.addEventListener('resize', resize);
+resize();
+
+// ── Gauge helpers ─────────────────────────────────────────────────────────────
+function gaugeVal(id, valId, raw, min, max) {
+  const pct = Math.max(0, Math.min(100, ((raw - min) / (max - min)) * 100));
+  $(id).style.width = pct + '%';
+  $(valId).textContent = raw.toFixed(3);
+  // colour by magnitude
+  const mag = Math.abs(raw / max);
+  const r = Math.round(100 + mag * 155);
+  const g = Math.round(200 - mag * 100);
+  $(id).style.background = `rgb(${r},${g},255)`;
+}
+
+function chip(id, ok) {
+  const el = $(id);
+  el.className = 'chip ' + (ok ? 'ok' : 'fail');
+  el.querySelector('.dot').style.background = ok ? 'var(--accent)' : 'var(--err)';
+}
+
+// ── Sparkline renderer ────────────────────────────────────────────────────────
+const COLORS = ['#60a5fa', '#34d399', '#f9a8d4'];
+const SERIES = ['ax','ay','az'];
+
+function drawSpark() {
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = '#0d1117';
+  ctx.fillRect(0, 0, W, H);
+
+  SERIES.forEach((k, i) => {
+    const pts = history[k];
+    if (pts.length < 2) return;
+    const min = -2, max = 2;
+    ctx.beginPath();
+    ctx.strokeStyle = COLORS[i];
+    ctx.lineWidth = 1.5 * devicePixelRatio;
+    pts.forEach((v, j) => {
+      const x = (j / (MAX_PTS - 1)) * W;
+      const y = H - ((v - min) / (max - min)) * H;
+      j === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+  });
+
+  // Zero line
+  ctx.beginPath();
+  ctx.strokeStyle = 'rgba(255,255,255,.1)';
+  ctx.lineWidth = 1;
+  const zeroY = H * 0.5;
+  ctx.moveTo(0, zeroY); ctx.lineTo(W, zeroY);
+  ctx.stroke();
+}
+
+// ── Main update ───────────────────────────────────────────────────────────────
+function update(data) {
+  if (!data || !data.imu) return;
+  const imu = data.imu;
+  pktCount++;
+
+  // Status bar
+  $('connDot').className = 'status-dot live';
+  $('connLabel').textContent = `Live · ${new Date().toLocaleTimeString()}`;
+  $('pktCount').textContent = `${pktCount} packets`;
+
+  // Device chips
+  chip('chip_imu', imu.ok);
+  chip('chip_sim', data.sim800);
+  chip('chip_a6',  data.a6);
+
+  // Values
+  $('ax').textContent = imu.ax?.toFixed(3) ?? '—';
+  $('ay').textContent = imu.ay?.toFixed(3) ?? '—';
+  $('az').textContent = imu.az?.toFixed(3) ?? '—';
+  $('gx').textContent = imu.gx?.toFixed(2) ?? '—';
+  $('gy').textContent = imu.gy?.toFixed(2) ?? '—';
+  $('gz').textContent = imu.gz?.toFixed(2) ?? '—';
+  $('tempVal').textContent = imu.temp ? imu.temp.toFixed(1) + ' °C' : '—';
+
+  // Color temp
+  const t = imu.temp ?? 25;
+  $('tempVal').style.color = t > 50 ? 'var(--err)' : t > 40 ? 'var(--warn)' : 'var(--temp)';
+
+  // Gauges (accel ±2g, gyro ±250°/s)
+  gaugeVal('g_ax', 'g_ax_v', imu.ax ?? 0, -2, 2);
+  gaugeVal('g_ay', 'g_ay_v', imu.ay ?? 0, -2, 2);
+  gaugeVal('g_az', 'g_az_v', imu.az ?? 0, -2, 2);
+  gaugeVal('g_gx', 'g_gx_v', imu.gx ?? 0, -250, 250);
+  gaugeVal('g_gy', 'g_gy_v', imu.gy ?? 0, -250, 250);
+  gaugeVal('g_gz', 'g_gz_v', imu.gz ?? 0, -250, 250);
+
+  // History
+  ['ax','ay','az'].forEach(k => {
+    history[k].push(imu[k] ?? 0);
+    if (history[k].length > MAX_PTS) history[k].shift();
+  });
+  drawSpark();
+
+  // Raw log (last 20 lines)
+  const rl = $('rawlog');
+  const line = document.createElement('div');
+  line.textContent = JSON.stringify(data);
+  rl.appendChild(line);
+  while (rl.children.length > 20) rl.removeChild(rl.firstChild);
+  rl.scrollTop = rl.scrollHeight;
+}
+
+// ── Web Serial API ────────────────────────────────────────────────────────────
+let serialBuffer = '';
+
+async function connectSerial() {
+  if (!('serial' in navigator)) {
+    alert('Web Serial not supported. Use Chrome or Edge.\nAlternatively, use the "Paste JSON" button.');
+    return;
+  }
+  try {
+    if (serialPort) {
+      await serialReader?.cancel();
+      await serialPort.close();
+      serialPort = null;
+      $('btnSerial').textContent = 'Connect Web Serial';
+      $('connDot').className = 'status-dot';
+      $('connLabel').textContent = 'Disconnected';
+      return;
+    }
+    serialPort = await navigator.serial.requestPort();
+    await serialPort.open({ baudRate: 115200 });
+    $('btnSerial').textContent = '⛔ Disconnect';
+    $('connDot').className = 'status-dot live';
+    $('connLabel').textContent = 'Serial connected…';
+
+    const decoder = new TextDecoderStream();
+    serialPort.readable.pipeTo(decoder.writable);
+    serialReader = decoder.readable.getReader();
+
+    while (true) {
+      const { value, done } = await serialReader.read();
+      if (done) break;
+      serialBuffer += value;
+      let nl;
+      while ((nl = serialBuffer.indexOf('\n')) >= 0) {
+        const line = serialBuffer.slice(0, nl).trim();
+        serialBuffer = serialBuffer.slice(nl + 1);
+        try {
+          if (line.startsWith('{')) update(JSON.parse(line));
+        } catch {}
+      }
+    }
+  } catch (e) {
+    console.warn('Serial:', e);
+    $('connLabel').textContent = 'Disconnected · ' + e.message;
+    $('connDot').className = 'status-dot error';
+  }
+}
+
+// ── Paste mode ────────────────────────────────────────────────────────────────
+function togglePaste() {
+  const pa = $('pasteArea');
+  pa.style.display = pa.style.display === 'none' ? 'block' : 'none';
+}
+
+function parsePaste(text) {
+  text.split('\n').forEach(line => {
+    line = line.trim();
+    try { if (line.startsWith('{')) update(JSON.parse(line)); } catch {}
+  });
+}
+
+// Drag & drop file
+document.addEventListener('dragover', e => e.preventDefault());
+document.addEventListener('drop', e => {
+  e.preventDefault();
+  const file = e.dataTransfer.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => parsePaste(ev.target.result);
+  reader.readAsText(file);
+});
+
+// ── Simulate (demo mode if no hardware) ───────────────────────────────────────
+let demoTimer = null;
+function startDemo() {
+  let t = 0;
+  demoTimer = setInterval(() => {
+    t += 0.1;
+    update({
+      imu: {
+        ok: true,
+        ax: Math.sin(t) * 0.3 + (Math.random() - .5) * .02,
+        ay: Math.cos(t * .7) * 0.2 + (Math.random() - .5) * .02,
+        az: 0.98 + Math.sin(t * 1.3) * .05,
+        gx: Math.sin(t * 2) * 15 + (Math.random() - .5) * 2,
+        gy: Math.cos(t * 1.5) * 10,
+        gz: Math.sin(t * .8) * 5,
+        temp: 28 + Math.sin(t * .05) * 2,
+      },
+      sim800: Math.random() > .05,
+      a6: Math.random() > .1,
+      ms: Math.round(t * 1000)
+    });
+  }, 100);
+}
+
+function clearData() {
+  pktCount = 0;
+  ['ax','ay','az'].forEach(k => history[k] = []);
+  $('rawlog').innerHTML = '';
+  $('connDot').className = 'status-dot';
+  $('connLabel').textContent = 'Cleared';
+  $('pktCount').textContent = '0 packets';
+  if (demoTimer) { clearInterval(demoTimer); demoTimer = null; }
+}
+
+// Auto-start demo if no serial action after 2 s
+setTimeout(() => {
+  if (pktCount === 0 && !serialPort) {
+    $('connLabel').textContent = 'Demo mode (no hardware connected)';
+    startDemo();
+  }
+}, 2000);
+</script>
+</body>
+</html>

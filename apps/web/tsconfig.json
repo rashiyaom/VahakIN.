@@ -31,11 +31,15 @@
   "include": [
     "**/*.ts",
     "**/*.tsx",
+    ".next-audit/types/**/*.ts",
     ".next-enrollment/types/**/*.ts",
+    ".next-imu-build/types/**/*.ts",
+    ".next-imu/types/**/*.ts",
+    ".next-mail-check/types/**/*.ts",
     ".next-verify/types/**/*.ts",
     ".next/types/**/*.ts",
     "next-env.d.ts",
-    ".next-mail-check/types/**/*.ts"
+    ".next-phone/types/**/*.ts"
   ],
   "exclude": [
     "node_modules"

@@ -49,7 +49,7 @@ function records(store: DemoStore): Change[] {
   }
   return result;
 }
-export async function accountTransaction<T>(account: Account, operation: (store: DemoStore) => T, options?: { deviceId?: string }) {
+export async function accountTransaction<T>(account: Account, operation: (store: DemoStore) => T, options?: { deviceId?: string }, attempt = 0): Promise<T> {
   if (account.mode !== "live") return withStoreTransaction(operation);
   const store = await accountStore(account);
   if (options?.deviceId && !store.enrollment!.devices.some(d => d.id === options.deviceId)) {
@@ -63,6 +63,7 @@ export async function accountTransaction<T>(account: Account, operation: (store:
   const changes = records(store).filter(r => before.get(`${r.kind}:${r.id}`) !== JSON.stringify(r));
   if (changes.length) {
     const { error } = await adminClient().rpc("ig_commit_workspace", { p_actor: account.id, p_expected: store.version, p_changes: changes });
+    if (error?.code === "40001" && attempt < 3) return accountTransaction(account, operation, options, attempt + 1);
     if (error) throw new EnrollmentError(error.code === "23505" ? "This device or vehicle already has a registration or pending application." : error.code === "40001" ? "Workspace changed. Refresh and retry." : "Unable to save the application transaction. Please retry or contact your office.", ["23505", "40001"].includes(error.code) ? 409 : 503);
   }
   return result;

@@ -95,6 +95,7 @@ test("new owner completes device-to-RTO onboarding, corrections, approval and in
   await reviewer.screenshot({ path: "/tmp/vahakin-enrollment-rto.png", fullPage: true });
   await page.reload();
   await expect(page.getByRole("heading", { name: "Approved. One step closer." })).toBeVisible();
+  await page.getByRole("button", { name: "Yes, I have mounted the device in my car" }).click();
   await page.getByRole("button", { name: "Run demo connection check" }).click();
   await expect(page.getByText("Connection status refreshed for your reviewer.")).toBeVisible();
   await reviewer.reload(); await reviewer.getByRole("button", { name: new RegExp(registration) }).click();
@@ -110,7 +111,7 @@ test("new owner completes device-to-RTO onboarding, corrections, approval and in
 
 test("mobile onboarding keeps draft fields accessible in both themes without overflow", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await login(page.request, "new"); await page.goto("/owner"); await page.waitForURL("**/owner/onboarding");
+  await login(page.request, "new"); await page.goto("/owner/onboarding"); await page.waitForURL("**/owner/onboarding");
   await expect(page.getByRole("heading", { name: "Your device", exact: true })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   expect(await page.locator(".enrol-main").evaluate(element => element.getBoundingClientRect().right <= innerWidth)).toBe(true);

@@ -1,8 +1,9 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import { fencePolygon, type GeofenceConfig } from "@/lib/monitoring";
 import type { Map as MapInstance, Marker, StyleSpecification } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
-export interface MapVehicle { id:string; registration:string; lat:number|null; lng:number|null; monitoring:string; gpsAt:string|null; locationStatus?:string; }
+export interface MapVehicle { locationSource?:string; geofenceConfig?:GeofenceConfig; id:string; registration:string; lat:number|null; lng:number|null; monitoring:string; gpsAt:string|null; locationStatus?:string; }
 type View = "streets" | "satellite" | "hybrid";
 const imageryKey = process.env.NEXT_PUBLIC_MAPTILER_KEY?.trim();
 const streets = "https://tiles.openfreemap.org/styles/liberty";
@@ -52,12 +53,23 @@ export function MonitoringMap({vehicles,onSelect,demo=false}:{vehicles:MapVehicl
       markers.current.forEach(m=>m.remove());markers.current=[];
       for(const vehicle of vehicles.filter(validPoint)){
         const button=document.createElement("button");button.type="button";button.className=`vehicle-marker ${(vehicle.locationStatus??vehicle.monitoring)!=="Current"?"stale":""}`;
-        button.setAttribute("aria-label",`${vehicle.registration}: ${vehicle.locationStatus??vehicle.monitoring} location`);
+        button.setAttribute("aria-label",`${vehicle.registration}: ${vehicle.locationStatus??vehicle.monitoring} ${vehicle.locationSource==="PHONE_BROWSER"?"phone-provided":"device"} location`);
         button.addEventListener("click",()=>select.current(vehicle.id));
         markers.current.push(new lib.Marker({element:button}).setLngLat([vehicle.lng!,vehicle.lat!]).addTo(map.current));
       }
       if(!fitted.current&&markers.current.length){fitVehicles();fitted.current=true;}
     });return()=>{cancelled=true;};
+  },[vehicles,ready,revision]);
+  useEffect(()=>{
+    const instance=map.current;if(!ready||!instance?.isStyleLoaded())return;
+    const data:GeoJSON.FeatureCollection={type:"FeatureCollection",features:vehicles.filter(v=>v.geofenceConfig?.enabled).map(v=>({type:"Feature",properties:{name:v.registration},geometry:{type:"Polygon",coordinates:[fencePolygon(v.geofenceConfig!)]}}))};
+    const source=instance.getSource("parking-fences") as import("maplibre-gl").GeoJSONSource|undefined;
+    if(source)source.setData(data);else{
+      instance.addSource("parking-fences",{type:"geojson",data});
+      instance.addLayer({id:"parking-fence-fill",type:"fill",source:"parking-fences",paint:{"fill-color":"#128c87","fill-opacity":0.13}});
+      instance.addLayer({id:"parking-fence-line",type:"line",source:"parking-fences",paint:{"line-color":"#128c87","line-width":2,"line-dasharray":[3,2]}});
+    }
+    if(!fitted.current&&data.features.length){const f=vehicles.find(v=>v.geofenceConfig?.enabled)!.geofenceConfig!;instance.fitBounds([[f.lng-f.radiusM/85000,f.lat-f.radiusM/110000],[f.lng+f.radiusM/85000,f.lat+f.radiusM/110000]],{padding:80,maxZoom:16,duration:0});fitted.current=true;}
   },[vehicles,ready,revision]);
   function switchView(next:View){
     if(next===view||!map.current)return;
@@ -78,7 +90,7 @@ export function MonitoringMap({vehicles,onSelect,demo=false}:{vehicles:MapVehicl
     {error&&<div className="map-load-notice" role="status"><span>Some map detail could not load.</span><button type="button" onClick={()=>{setReady(false);setError(false);setAttempt(n=>n+1);}}>Retry</button>{view!=="streets"&&<button type="button" onClick={()=>switchView("streets")}>Use streets</button>}</div>}
     {!ready&&!error&&<div className="map-load-notice" role="status">Loading map…</div>}
     <div className="map-info"><span>{demo?"Demo vehicle markers":"Authorized vehicle locations"}</span>{view!=="streets"?<small>Satellite imagery is not live video.</small>:tilted?<small>Building heights appear where mapped. Zoom in for detail.</small>:!imageryKey?<small>Satellite imagery is not available yet.</small>:null}</div>
-    <div className="map-legend"><span><i/>Current</span><span><i className="stale"/>Last known</span>{!vehicles.some(validPoint)&&<small>No vehicle coordinates yet · exploring Rajkot</small>}</div>
+    <div className="map-legend"><span><i/>Current</span><span><i className="stale"/>Last known</span><span>Dashed circle: parking geofence</span>{vehicles.some(v=>v.locationSource==="PHONE_BROWSER")&&<span>Plus location: owner’s phone</span>}{!vehicles.some(validPoint)&&<small>No vehicle coordinates yet · exploring Rajkot</small>}</div>
     {view!=="streets"&&<a className="map-provider-credit" href="https://www.maptiler.com/" target="_blank" rel="noreferrer">MapTiler</a>}
   </div>;
 }

@@ -21,6 +21,6 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
       if (error || !data) throw new Error("Unavailable storage object");
       bytes = new Uint8Array(await data.arrayBuffer());
     } else bytes = new Uint8Array(readFileSync(path.join(uploadDirectory, id)));
-    return new Response(new Uint8Array(bytes), { headers: { "Content-Type": doc.mime, "Content-Disposition": `attachment; filename="${doc.name}"`, "X-Content-Type-Options": "nosniff", "Cache-Control": "private, no-store", "Content-Security-Policy": "default-src 'none'; sandbox" } });
+    return new Response(new Uint8Array(bytes), { headers: { "Content-Type": doc.mime, "Content-Disposition": `${new URL(_request.url).searchParams.get("preview") === "1" ? "inline" : "attachment"}; filename="${doc.name.replace(/["\\\r\n]/g, "_")}"`, "X-Content-Type-Options": "nosniff", "Cache-Control": "private, no-store", "Content-Security-Policy": "default-src 'none'; sandbox" } });
   } catch { return NextResponse.json({ error: "This file is temporarily unavailable. Contact the office." }, { status: 404 }); }
 }
