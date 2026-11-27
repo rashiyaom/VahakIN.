@@ -1,0 +1,790 @@
+{
+  "page_mm": [
+    594,
+    420
+  ],
+  "warnings": [],
+  "objects": [
+    {
+      "kind": "image",
+      "file": "charusat.png",
+      "x": 12.0,
+      "y": 11.451012815212898,
+      "w": 94.0,
+      "h": 17.097974369574203
+    },
+    {
+      "kind": "image",
+      "file": "sfic.png",
+      "x": 506.6823899371069,
+      "y": 7.000000000000002,
+      "w": 61.63522012578616,
+      "h": 27.999999999999996
+    },
+    {
+      "kind": "text",
+      "text": "VahakIN.",
+      "x": 261,
+      "y": 11,
+      "w": 98,
+      "h": 15,
+      "size": 33
+    },
+    {
+      "kind": "text",
+      "text": "Evidence-Led Vehicle Non-Use Monitoring",
+      "x": 12,
+      "y": 36,
+      "w": 570,
+      "h": 16,
+      "size": 34
+    },
+    {
+      "kind": "text",
+      "text": "Two ESP32-S3 devices for motion sensing, location sharing and RTO review",
+      "x": 12,
+      "y": 52,
+      "w": 570,
+      "h": 9,
+      "size": 18
+    },
+    {
+      "kind": "text",
+      "text": "Om Rashiya  \u2022  Devanshi Patel  \u2022  Aadya Raval  \u2022  Lakshit Hirpara  \u2022  Vaidehi Patel",
+      "x": 12,
+      "y": 63,
+      "w": 570,
+      "h": 7,
+      "size": 15
+    },
+    {
+      "kind": "text",
+      "text": "Team VahikIN.   |   Mentor: Prof Abhishek Patel   |   CSPIT, CHARUSAT   |   SFIC 2026 \u00b7 PS000225 \u00b7 TM002281",
+      "x": 12,
+      "y": 71,
+      "w": 570,
+      "h": 6,
+      "size": 12.5
+    },
+    {
+      "kind": "text",
+      "text": "01",
+      "x": 12,
+      "y": 86,
+      "w": 12,
+      "h": 9,
+      "size": 17
+    },
+    {
+      "kind": "text",
+      "text": "ABSTRACT & RESEARCH AIM",
+      "x": 26,
+      "y": 86,
+      "w": 170,
+      "h": 9,
+      "size": 18
+    },
+    {
+      "kind": "text",
+      "text": "VahakIN links declared Non-Use vehicles to reviewable motion and location evidence. Two hardware tiers share one owner-to-RTO workflow: claim a device, submit documents, verify dashboard mounting and inspect alerts. The prototype separates device motion from geographic displacement and preserves human review before any regulatory decision [1].",
+      "x": 12,
+      "y": 101,
+      "w": 184,
+      "h": 39,
+      "size": 14
+    },
+    {
+      "kind": "text",
+      "text": "Index Terms\u2014ESP32-S3, IMU, GNSS, geofencing, Non-Use declarations.",
+      "x": 12,
+      "y": 133,
+      "w": 184,
+      "h": 8,
+      "size": 10.5
+    },
+    {
+      "kind": "text",
+      "text": "02",
+      "x": 12,
+      "y": 144,
+      "w": 12,
+      "h": 9,
+      "size": 17
+    },
+    {
+      "kind": "text",
+      "text": "SYSTEM & WORKFLOW",
+      "x": 26,
+      "y": 144,
+      "w": 170,
+      "h": 9,
+      "size": 18
+    },
+    {
+      "kind": "text",
+      "text": "BASIC TRACKER",
+      "x": 15,
+      "y": 161,
+      "w": 82,
+      "h": 6,
+      "size": 13
+    },
+    {
+      "kind": "text",
+      "text": "MPU-6050 + NEO-6M",
+      "x": 15,
+      "y": 168,
+      "w": 82,
+      "h": 8,
+      "size": 10.5
+    },
+    {
+      "kind": "text",
+      "text": "PLUS WATCH",
+      "x": 111,
+      "y": 161,
+      "w": 82,
+      "h": 6,
+      "size": 13
+    },
+    {
+      "kind": "text",
+      "text": "QMI8658 + phone location",
+      "x": 111,
+      "y": 168,
+      "w": 82,
+      "h": 8,
+      "size": 10.5
+    },
+    {
+      "kind": "text",
+      "text": "2.4 GHz HOTSPOT \u2192 LAPTOP",
+      "x": 15,
+      "y": 184,
+      "w": 178,
+      "h": 6,
+      "size": 13
+    },
+    {
+      "kind": "text",
+      "text": "Signed IMU packets \u00b7 Basic GNSS \u00b7 separate consented phone fixes",
+      "x": 15,
+      "y": 191,
+      "w": 178,
+      "h": 10,
+      "size": 10.5
+    },
+    {
+      "kind": "text",
+      "text": "NEXT.JS API + SUPABASE",
+      "x": 15,
+      "y": 209,
+      "w": 178,
+      "h": 6,
+      "size": 13
+    },
+    {
+      "kind": "text",
+      "text": "Authentication \u00b7 private evidence \u00b7 device assignment \u00b7 event history",
+      "x": 15,
+      "y": 216,
+      "w": 178,
+      "h": 10,
+      "size": 10.5
+    },
+    {
+      "kind": "text",
+      "text": "OWNER WORKSPACE",
+      "x": 15,
+      "y": 234,
+      "w": 82,
+      "h": 6,
+      "size": 13
+    },
+    {
+      "kind": "text",
+      "text": "Claim \u00b7 upload \u00b7 mount \u00b7 share",
+      "x": 15,
+      "y": 241,
+      "w": 82,
+      "h": 8,
+      "size": 10.5
+    },
+    {
+      "kind": "text",
+      "text": "RTO WORKSPACE",
+      "x": 111,
+      "y": 234,
+      "w": 82,
+      "h": 6,
+      "size": 13
+    },
+    {
+      "kind": "text",
+      "text": "Preview \u00b7 decide \u00b7 fence \u00b7 review",
+      "x": 111,
+      "y": 241,
+      "w": 82,
+      "h": 8,
+      "size": 10.5
+    },
+    {
+      "kind": "text",
+      "text": "Claim \u2192 application \u2192 RTO review \u2192 dashboard confirmation \u2192 installation check \u2192 monitoring",
+      "x": 12,
+      "y": 253,
+      "w": 184,
+      "h": 13,
+      "size": 12.5
+    },
+    {
+      "kind": "text",
+      "text": "03",
+      "x": 12,
+      "y": 271,
+      "w": 12,
+      "h": 9,
+      "size": 17
+    },
+    {
+      "kind": "text",
+      "text": "HARDWARE & IMPLEMENTED FEATURES",
+      "x": 26,
+      "y": 271,
+      "w": 170,
+      "h": 9,
+      "size": 18
+    },
+    {
+      "kind": "text",
+      "text": "Platform",
+      "x": 14,
+      "y": 287.5,
+      "w": 34,
+      "h": 6,
+      "size": 10.8
+    },
+    {
+      "kind": "text",
+      "text": "Basic",
+      "x": 52,
+      "y": 287.5,
+      "w": 69,
+      "h": 6,
+      "size": 10.8
+    },
+    {
+      "kind": "text",
+      "text": "Premium Plus",
+      "x": 125,
+      "y": 287.5,
+      "w": 69,
+      "h": 6,
+      "size": 10.8
+    },
+    {
+      "kind": "text",
+      "text": "IMU / bus",
+      "x": 14,
+      "y": 296.2,
+      "w": 34,
+      "h": 6,
+      "size": 10.8
+    },
+    {
+      "kind": "text",
+      "text": "MPU-6050 \u00b7 SDA8/SCL9",
+      "x": 52,
+      "y": 296.2,
+      "w": 69,
+      "h": 6,
+      "size": 10.8
+    },
+    {
+      "kind": "text",
+      "text": "QMI8658 \u00b7 SDA15/SCL14",
+      "x": 125,
+      "y": 296.2,
+      "w": 69,
+      "h": 6,
+      "size": 10.8
+    },
+    {
+      "kind": "text",
+      "text": "Location",
+      "x": 14,
+      "y": 304.9,
+      "w": 34,
+      "h": 6,
+      "size": 10.8
+    },
+    {
+      "kind": "text",
+      "text": "NEO-6M \u00b7 UART RX16",
+      "x": 52,
+      "y": 304.9,
+      "w": 69,
+      "h": 6,
+      "size": 10.8
+    },
+    {
+      "kind": "text",
+      "text": "Owner phone browser [4]",
+      "x": 125,
+      "y": 304.9,
+      "w": 69,
+      "h": 6,
+      "size": 10.8
+    },
+    {
+      "kind": "text",
+      "text": "Transport",
+      "x": 14,
+      "y": 313.59999999999997,
+      "w": 34,
+      "h": 6,
+      "size": 10.8
+    },
+    {
+      "kind": "text",
+      "text": "Wi-Fi hotspot",
+      "x": 52,
+      "y": 313.59999999999997,
+      "w": 69,
+      "h": 6,
+      "size": 10.8
+    },
+    {
+      "kind": "text",
+      "text": "Wi-Fi hotspot",
+      "x": 125,
+      "y": 313.59999999999997,
+      "w": 69,
+      "h": 6,
+      "size": 10.8
+    },
+    {
+      "kind": "text",
+      "text": "Current scope",
+      "x": 14,
+      "y": 322.29999999999995,
+      "w": 34,
+      "h": 6,
+      "size": 10.8
+    },
+    {
+      "kind": "text",
+      "text": "External IMU + GPS",
+      "x": 52,
+      "y": 322.29999999999995,
+      "w": 69,
+      "h": 6,
+      "size": 10.8
+    },
+    {
+      "kind": "text",
+      "text": "Onboard IMU; no GPS/SIM",
+      "x": 125,
+      "y": 322.29999999999995,
+      "w": 69,
+      "h": 6,
+      "size": 10.8
+    },
+    {
+      "kind": "image",
+      "file": "watch.jpg",
+      "x": 17.5,
+      "y": 332.0,
+      "w": 25.0,
+      "h": 25.0
+    },
+    {
+      "kind": "text",
+      "text": "Premium Plus \u00b7 Waveshare ESP32-S3R8 [2], [3].\n2.06-inch AMOLED (410 \u00d7 502) and six-axis IMU. The demo uses sensing and Wi-Fi. Display and touch software are planned.",
+      "x": 53,
+      "y": 333,
+      "w": 143,
+      "h": 22,
+      "size": 12
+    },
+    {
+      "kind": "text",
+      "text": "04",
+      "x": 205,
+      "y": 86,
+      "w": 12,
+      "h": 9,
+      "size": 17
+    },
+    {
+      "kind": "text",
+      "text": "SUSTAINED-MOTION METHOD",
+      "x": 219,
+      "y": 86,
+      "w": 170,
+      "h": 9,
+      "size": 18
+    },
+    {
+      "kind": "text",
+      "text": "50 Hz sampling \u00b7 5 s still calibration \u00b7 2 s rolling window. Trigger when \u226575/100 samples exceed 0.12 g dynamic acceleration OR 12\u00b0/s rotation. Re-arm after 5 s quiet.",
+      "x": 205,
+      "y": 101,
+      "w": 184,
+      "h": 23,
+      "size": 14
+    },
+    {
+      "kind": "image",
+      "file": "imu-plot.png",
+      "x": 205,
+      "y": 128,
+      "w": 184,
+      "h": 78.5
+    },
+    {
+      "kind": "text",
+      "text": "Fig. 1. Software test with synthetic IMU inputs. The classifier rejects a 0.4 s bump and emits one event during sustained motion.",
+      "x": 205,
+      "y": 209,
+      "w": 184,
+      "h": 17,
+      "size": 11.5
+    },
+    {
+      "kind": "text",
+      "text": "05",
+      "x": 205,
+      "y": 230,
+      "w": 12,
+      "h": 9,
+      "size": 17
+    },
+    {
+      "kind": "text",
+      "text": "LOCATION & GEOFENCE LOGIC",
+      "x": 219,
+      "y": 230,
+      "w": 170,
+      "h": 9,
+      "size": 18
+    },
+    {
+      "kind": "text",
+      "text": "Basic: \u22655 satellites, HDOP \u22642.5. Plus: phone accuracy \u226430 m and explicit consent. Accept fresh fixes (\u226415 s); confirm exits using two fixes 3\u201330 s apart beyond radius + buffer.",
+      "x": 205,
+      "y": 245,
+      "w": 184,
+      "h": 22,
+      "size": 13.5
+    },
+    {
+      "kind": "image",
+      "file": "location-plot.png",
+      "x": 205,
+      "y": 271,
+      "w": 184,
+      "h": 68.2
+    },
+    {
+      "kind": "text",
+      "text": "Fig. 2. Simulated distance series for a 150 m fence with a 25 m buffer. Plus expands the buffer to reported accuracy and requires a fresh watch reading.",
+      "x": 205,
+      "y": 341,
+      "w": 184,
+      "h": 13,
+      "size": 11.5
+    },
+    {
+      "kind": "text",
+      "text": "06",
+      "x": 398,
+      "y": 86,
+      "w": 12,
+      "h": 9,
+      "size": 17
+    },
+    {
+      "kind": "text",
+      "text": "WORKING WEBSITE",
+      "x": 412,
+      "y": 86,
+      "w": 170,
+      "h": 9,
+      "size": 18
+    },
+    {
+      "kind": "image",
+      "file": "website-map.png",
+      "x": 398,
+      "y": 101,
+      "w": 184,
+      "h": 61.5
+    },
+    {
+      "kind": "text",
+      "text": "Fig. 3. Actual RTO map with demo markers. \u00a9 OpenFreeMap / OpenMapTiles / OpenStreetMap. Markers represent fictional vehicles.",
+      "x": 398,
+      "y": 164,
+      "w": 184,
+      "h": 10,
+      "size": 10.7
+    },
+    {
+      "kind": "image",
+      "file": "website-plus.png",
+      "x": 398,
+      "y": 178,
+      "w": 89,
+      "h": 39
+    },
+    {
+      "kind": "image",
+      "file": "website-evidence.png",
+      "x": 493,
+      "y": 178,
+      "w": 89,
+      "h": 39
+    },
+    {
+      "kind": "text",
+      "text": "Owner: IMU + phone-sharing control",
+      "x": 398,
+      "y": 219,
+      "w": 89,
+      "h": 9,
+      "size": 10.3
+    },
+    {
+      "kind": "text",
+      "text": "RTO: private document preview",
+      "x": 493,
+      "y": 219,
+      "w": 89,
+      "h": 9,
+      "size": 10.3
+    },
+    {
+      "kind": "text",
+      "text": "07",
+      "x": 398,
+      "y": 234,
+      "w": 12,
+      "h": 9,
+      "size": 17
+    },
+    {
+      "kind": "text",
+      "text": "VALIDATION & RESOURCE USE",
+      "x": 412,
+      "y": 234,
+      "w": 170,
+      "h": 9,
+      "size": 18
+    },
+    {
+      "kind": "text",
+      "text": "84 / 84",
+      "x": 401,
+      "y": 250,
+      "w": 52,
+      "h": 10,
+      "size": 23
+    },
+    {
+      "kind": "text",
+      "text": "unit tests passed",
+      "x": 401,
+      "y": 261,
+      "w": 52,
+      "h": 6,
+      "size": 11
+    },
+    {
+      "kind": "text",
+      "text": "7 / 8",
+      "x": 464,
+      "y": 250,
+      "w": 52,
+      "h": 10,
+      "size": 23
+    },
+    {
+      "kind": "text",
+      "text": "browser audit passed",
+      "x": 464,
+      "y": 261,
+      "w": 52,
+      "h": 6,
+      "size": 11
+    },
+    {
+      "kind": "text",
+      "text": "2 / 2",
+      "x": 527,
+      "y": 250,
+      "w": 52,
+      "h": 10,
+      "size": 23
+    },
+    {
+      "kind": "text",
+      "text": "firmware builds passed",
+      "x": 527,
+      "y": 261,
+      "w": 52,
+      "h": 6,
+      "size": 11
+    },
+    {
+      "kind": "image",
+      "file": "memory-plot.png",
+      "x": 398,
+      "y": 272,
+      "w": 184,
+      "h": 34.8
+    },
+    {
+      "kind": "text",
+      "text": "Fig. 4. Compiled image size / 1,310,720-byte app partition. Basic: 878,441 B; Plus: 870,137 B. Static RAM: 14% each.",
+      "x": 398,
+      "y": 309,
+      "w": 184,
+      "h": 11,
+      "size": 10.5
+    },
+    {
+      "kind": "text",
+      "text": "Latest Plus end-to-end reruns were blocked by login 503 / application timeout. Flashing and mounted vehicle trials are pending. Handling can also trigger a motion event.",
+      "x": 398,
+      "y": 324,
+      "w": 184,
+      "h": 16,
+      "size": 12
+    },
+    {
+      "kind": "text",
+      "text": "Next steps include mounted trials, false-alarm and battery measurements, and a complete Plus retest.",
+      "x": 398,
+      "y": 342,
+      "w": 184,
+      "h": 13,
+      "size": 12
+    },
+    {
+      "kind": "text",
+      "text": "SECURITY & STACK",
+      "x": 12,
+      "y": 363,
+      "w": 105,
+      "h": 7,
+      "size": 14
+    },
+    {
+      "kind": "text",
+      "text": "HMAC-SHA256 \u2022 nonce replay checks \u2022 timestamp validation \u2022 private uploads \u2022 scoped owner/RTO access [5]\nArduino C++ / FreeRTOS \u00b7 Next.js 15 \u00b7 React 19 \u00b7 TypeScript \u00b7 Supabase / PostgreSQL \u00b7 MapLibre \u00b7 Vitest / Playwright",
+      "x": 12,
+      "y": 371,
+      "w": 365,
+      "h": 12,
+      "size": 11.5
+    },
+    {
+      "kind": "text",
+      "text": "SELECTED REFERENCES",
+      "x": 12,
+      "y": 386,
+      "w": 110,
+      "h": 6,
+      "size": 11.5
+    },
+    {
+      "kind": "text",
+      "text": "[1] Team VahikIN., \u201cPS000225 specification and implementation,\u201d project repository, 2026.",
+      "x": 12,
+      "y": 392.0,
+      "w": 365,
+      "h": 4.2,
+      "size": 9.6
+    },
+    {
+      "kind": "text",
+      "text": "[2] Waveshare, \u201cESP32-S3-Touch-AMOLED-2.06: board and QMI8658 examples,\u201d 2026.",
+      "x": 12,
+      "y": 395.9,
+      "w": 365,
+      "h": 4.2,
+      "size": 9.6
+    },
+    {
+      "kind": "text",
+      "text": "[3] Espressif, \u201cESP32-S3 Series Datasheet,\u201d ver. 2.2.",
+      "x": 12,
+      "y": 399.8,
+      "w": 365,
+      "h": 4.2,
+      "size": 9.6
+    },
+    {
+      "kind": "text",
+      "text": "[4] W3C, \u201cGeolocation,\u201d Candidate Recommendation Draft, Nov. 18, 2026.",
+      "x": 12,
+      "y": 403.7,
+      "w": 365,
+      "h": 4.2,
+      "size": 9.6
+    },
+    {
+      "kind": "text",
+      "text": "[5] Supabase, \u201cRow Level Security,\u201d developer documentation. Accessed Nov. 27, 2026.",
+      "x": 12,
+      "y": 407.6,
+      "w": 365,
+      "h": 4.2,
+      "size": 9.6
+    },
+    {
+      "kind": "image",
+      "file": "github-qr.png",
+      "x": 412,
+      "y": 365,
+      "w": 36,
+      "h": 36
+    },
+    {
+      "kind": "text",
+      "text": "SOURCE CODE",
+      "x": 401,
+      "y": 402,
+      "w": 58,
+      "h": 6,
+      "size": 10.5
+    },
+    {
+      "kind": "image",
+      "file": "research-qr.png",
+      "x": 504,
+      "y": 365,
+      "w": 36,
+      "h": 36
+    },
+    {
+      "kind": "text",
+      "text": "RESEARCH MATERIAL",
+      "x": 493,
+      "y": 402,
+      "w": 58,
+      "h": 6,
+      "size": 10.5
+    },
+    {
+      "kind": "text",
+      "text": "SFIC 2026  /  27 NOV 2026  /  RESEARCH PROTOTYPE  /  A2 LANDSCAPE \u00b7 594 \u00d7 420 mm",
+      "x": 12,
+      "y": 411,
+      "w": 570,
+      "h": 4,
+      "size": 8.5
+    }
+  ]
+}

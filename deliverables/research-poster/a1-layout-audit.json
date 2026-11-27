@@ -1,0 +1,765 @@
+{
+  "page_mm": [
+    841,
+    594
+  ],
+  "warnings": [],
+  "objects": [
+    {
+      "kind": "image",
+      "file": "charusat.png",
+      "x": 12.0,
+      "y": 11.451012815212898,
+      "w": 94.0,
+      "h": 17.097974369574203
+    },
+    {
+      "kind": "image",
+      "file": "sfic.png",
+      "x": 506.6823899371069,
+      "y": 7.000000000000002,
+      "w": 61.63522012578616,
+      "h": 27.999999999999996
+    },
+    {
+      "kind": "text",
+      "text": "VahakIN.",
+      "x": 261,
+      "y": 11,
+      "w": 98,
+      "h": 15,
+      "size": 33
+    },
+    {
+      "kind": "text",
+      "text": "Evidence-Led Vehicle Non-Use Monitoring",
+      "x": 12,
+      "y": 32,
+      "w": 570,
+      "h": 16,
+      "size": 34
+    },
+    {
+      "kind": "text",
+      "text": "Device-side sensing and location, RTO review, and Gujarat vehicle tax decision support",
+      "x": 12,
+      "y": 48,
+      "w": 570,
+      "h": 9,
+      "size": 17
+    },
+    {
+      "kind": "text",
+      "text": "Om Rashiya  \u2022  Devanshi Patel  \u2022  Aadya Raval  \u2022  Lakshit Hirpara  \u2022  Vaidehi Patel",
+      "x": 12,
+      "y": 59,
+      "w": 570,
+      "h": 7,
+      "size": 15
+    },
+    {
+      "kind": "text",
+      "text": "Team VahikIN.   |   Mentor: Prof Abhishek Patel   |   CSPIT, CHARUSAT   |   SFIC 2026 \u00b7 PS000225 \u00b7 TM002281",
+      "x": 12,
+      "y": 67,
+      "w": 570,
+      "h": 6,
+      "size": 12.5
+    },
+    {
+      "kind": "text",
+      "text": "01",
+      "x": 12,
+      "y": 82,
+      "w": 12,
+      "h": 9,
+      "size": 17
+    },
+    {
+      "kind": "text",
+      "text": "ABSTRACT & DESIGN GOAL",
+      "x": 26,
+      "y": 82,
+      "w": 170,
+      "h": 9,
+      "size": 18
+    },
+    {
+      "kind": "text",
+      "text": "VahakIN supports owners and Regional Transport Offices (RTOs) in monitoring vehicles declared Non-Use. Both device designs capture motion and geographic position on the vehicle. The website links that evidence to the declaration, owner explanations, and an independent review of any proposed tax assessment [1].",
+      "x": 12,
+      "y": 96,
+      "w": 184,
+      "h": 33,
+      "size": 13.4
+    },
+    {
+      "kind": "text",
+      "text": "Index terms \u2014 ESP32-S3, GNSS, inertial sensing, geofencing, vehicle taxation.",
+      "x": 12,
+      "y": 130,
+      "w": 184,
+      "h": 7,
+      "size": 10.5
+    },
+    {
+      "kind": "text",
+      "text": "02",
+      "x": 12,
+      "y": 141,
+      "w": 12,
+      "h": 9,
+      "size": 17
+    },
+    {
+      "kind": "text",
+      "text": "AUTONOMOUS DEVICE DESIGN",
+      "x": 26,
+      "y": 141,
+      "w": 170,
+      "h": 9,
+      "size": 18
+    },
+    {
+      "kind": "text",
+      "text": "Component",
+      "x": 14,
+      "y": 156.6,
+      "w": 29,
+      "h": 6.4,
+      "size": 10.9
+    },
+    {
+      "kind": "text",
+      "text": "Basic tracker",
+      "x": 47,
+      "y": 156.6,
+      "w": 70,
+      "h": 6.4,
+      "size": 10.9
+    },
+    {
+      "kind": "text",
+      "text": "Premium Plus watch",
+      "x": 121,
+      "y": 156.6,
+      "w": 73,
+      "h": 6.4,
+      "size": 10.9
+    },
+    {
+      "kind": "text",
+      "text": "Controller",
+      "x": 14,
+      "y": 165.7,
+      "w": 29,
+      "h": 6.4,
+      "size": 10.9
+    },
+    {
+      "kind": "text",
+      "text": "ESP32-S3",
+      "x": 47,
+      "y": 165.7,
+      "w": 70,
+      "h": 6.4,
+      "size": 10.9
+    },
+    {
+      "kind": "text",
+      "text": "Waveshare ESP32-S3R8",
+      "x": 121,
+      "y": 165.7,
+      "w": 73,
+      "h": 6.4,
+      "size": 10.9
+    },
+    {
+      "kind": "text",
+      "text": "Motion",
+      "x": 14,
+      "y": 174.79999999999998,
+      "w": 29,
+      "h": 6.4,
+      "size": 10.9
+    },
+    {
+      "kind": "text",
+      "text": "MPU-6050 over I\u00b2C",
+      "x": 47,
+      "y": 174.79999999999998,
+      "w": 70,
+      "h": 6.4,
+      "size": 10.9
+    },
+    {
+      "kind": "text",
+      "text": "Onboard QMI8658 over I\u00b2C",
+      "x": 121,
+      "y": 174.79999999999998,
+      "w": 73,
+      "h": 6.4,
+      "size": 10.9
+    },
+    {
+      "kind": "text",
+      "text": "Position",
+      "x": 14,
+      "y": 183.89999999999998,
+      "w": 29,
+      "h": 6.4,
+      "size": 10.9
+    },
+    {
+      "kind": "text",
+      "text": "Device NEO-6M GNSS",
+      "x": 47,
+      "y": 183.89999999999998,
+      "w": 70,
+      "h": 6.4,
+      "size": 10.9
+    },
+    {
+      "kind": "text",
+      "text": "Watch-attached GNSS planned",
+      "x": 121,
+      "y": 183.89999999999998,
+      "w": 73,
+      "h": 6.4,
+      "size": 10.9
+    },
+    {
+      "kind": "text",
+      "text": "Uplink",
+      "x": 14,
+      "y": 192.99999999999997,
+      "w": 29,
+      "h": 6.4,
+      "size": 10.9
+    },
+    {
+      "kind": "text",
+      "text": "Wi-Fi demo, modem planned",
+      "x": 47,
+      "y": 192.99999999999997,
+      "w": 70,
+      "h": 6.4,
+      "size": 10.9
+    },
+    {
+      "kind": "text",
+      "text": "Watch-attached modem planned",
+      "x": 121,
+      "y": 192.99999999999997,
+      "w": 73,
+      "h": 6.4,
+      "size": 10.9
+    },
+    {
+      "kind": "text",
+      "text": "Target operation. Basic obtains its own location from NEO-6M. Plus will obtain its own location from a GNSS module fitted to the watch. Each unit samples, timestamps, buffers and uploads evidence through its own network interface. The target workflow requires no owner handset [1]\u2013[3].",
+      "x": 12,
+      "y": 203,
+      "w": 184,
+      "h": 29,
+      "size": 12.7
+    },
+    {
+      "kind": "text",
+      "text": "Build status \u00b7 Basic GNSS firmware is implemented. Plus IMU firmware is implemented and its GNSS/modem integration is planned.",
+      "x": 12,
+      "y": 233,
+      "w": 184,
+      "h": 11,
+      "size": 10.6
+    },
+    {
+      "kind": "text",
+      "text": "03",
+      "x": 12,
+      "y": 248,
+      "w": 12,
+      "h": 9,
+      "size": 17
+    },
+    {
+      "kind": "text",
+      "text": "GUJARAT NON-USE & TAX",
+      "x": 26,
+      "y": 248,
+      "w": 170,
+      "h": 9,
+      "size": 18
+    },
+    {
+      "kind": "text",
+      "text": "Form NT records the reason, period and garage address under Rule 5 [5]. Section 3(2) ties Non-Use recognition to certification by the Taxation Authority. The portal separates application review, certification status and movement requests [4], [5].",
+      "x": 12,
+      "y": 262,
+      "w": 184,
+      "h": 24,
+      "size": 12.5
+    },
+    {
+      "kind": "text",
+      "text": "The calculator selects a rule by vehicle class, jurisdiction and assessable period, then computes the estimate in whole paise. Distance and travel time inform the investigation. The notified schedule and applicable period determine the base tax [1], [4].",
+      "x": 12,
+      "y": 288,
+      "w": 184,
+      "h": 24,
+      "size": 12.5
+    },
+    {
+      "kind": "text",
+      "text": "ILLUSTRATIVE TAX REVIEW  /  DEMO",
+      "x": 16,
+      "y": 317,
+      "w": 176,
+      "h": 6,
+      "size": 10.5
+    },
+    {
+      "kind": "text",
+      "text": "INR 6,000 base + 12,000 penalty = 18,000",
+      "x": 16,
+      "y": 324,
+      "w": 176,
+      "h": 9,
+      "size": 16
+    },
+    {
+      "kind": "text",
+      "text": "Illustrative base and potential 2\u00d7 penalty under \u00a718(1A) [4].",
+      "x": 16,
+      "y": 333,
+      "w": 176,
+      "h": 5.5,
+      "size": 10.5
+    },
+    {
+      "kind": "text",
+      "text": "Section 18(1B) prevents stacking \u00a718(1) and \u00a718(1A) penalties. The demo requests an owner explanation before an independent decision. Official assessments require verified rates and an authorized Taxation Authority [1], [4].",
+      "x": 12,
+      "y": 344,
+      "w": 184,
+      "h": 25,
+      "size": 12
+    },
+    {
+      "kind": "text",
+      "text": "04",
+      "x": 205,
+      "y": 82,
+      "w": 12,
+      "h": 9,
+      "size": 17
+    },
+    {
+      "kind": "text",
+      "text": "MOTION CLASSIFICATION",
+      "x": 219,
+      "y": 82,
+      "w": 170,
+      "h": 9,
+      "size": 18
+    },
+    {
+      "kind": "text",
+      "text": "Sample at 50 Hz and calibrate for 5 s while still. In each 2 s window, require 75 of 100 samples at or above 0.12 g of dynamic acceleration or 12\u00b0/s of rotation. Re-arm after 5 s of quiet.",
+      "x": 205,
+      "y": 96,
+      "w": 184,
+      "h": 22,
+      "size": 13.2
+    },
+    {
+      "kind": "image",
+      "file": "imu-plot.png",
+      "x": 205,
+      "y": 121,
+      "w": 184,
+      "h": 78.5
+    },
+    {
+      "kind": "text",
+      "text": "Fig. 1. Software test with synthetic IMU inputs. A short bump is rejected and sustained motion emits one event.",
+      "x": 205,
+      "y": 201,
+      "w": 184,
+      "h": 12,
+      "size": 11
+    },
+    {
+      "kind": "text",
+      "text": "05",
+      "x": 205,
+      "y": 219,
+      "w": 12,
+      "h": 9,
+      "size": 17
+    },
+    {
+      "kind": "text",
+      "text": "LOCATION & GEOFENCE",
+      "x": 219,
+      "y": 219,
+      "w": 170,
+      "h": 9,
+      "size": 18
+    },
+    {
+      "kind": "text",
+      "text": "Each target device supplies GNSS fixes. Basic qualifies fixes with at least five satellites, HDOP \u22642.5 and age \u226415 s. Two accepted fixes 3\u201330 s apart beyond the configured radius plus 25 m confirm a Basic geofence exit.",
+      "x": 205,
+      "y": 233,
+      "w": 184,
+      "h": 24,
+      "size": 13.1
+    },
+    {
+      "kind": "image",
+      "file": "location-plot.png",
+      "x": 205,
+      "y": 262,
+      "w": 184,
+      "h": 68.2
+    },
+    {
+      "kind": "text",
+      "text": "Fig. 2. Simulated distance from the parking centre. A 150 m radius plus a 25 m buffer gives a 175 m exit threshold.",
+      "x": 205,
+      "y": 332,
+      "w": 184,
+      "h": 11,
+      "size": 11
+    },
+    {
+      "kind": "text",
+      "text": "HOW RTO STAFF USE A SIGNAL",
+      "x": 209,
+      "y": 348,
+      "w": 176,
+      "h": 7,
+      "size": 11.5
+    },
+    {
+      "kind": "text",
+      "text": "Motion can come from handling. GNSS drift can place a stationary device near a boundary. Staff review the observations, permission record and owner explanation before deciding the case.",
+      "x": 209,
+      "y": 355,
+      "w": 176,
+      "h": 12,
+      "size": 10.8
+    },
+    {
+      "kind": "text",
+      "text": "06",
+      "x": 398,
+      "y": 82,
+      "w": 12,
+      "h": 9,
+      "size": 17
+    },
+    {
+      "kind": "text",
+      "text": "WEBSITE SCREENS",
+      "x": 412,
+      "y": 82,
+      "w": 170,
+      "h": 9,
+      "size": 18
+    },
+    {
+      "kind": "image",
+      "file": "website-map.png",
+      "x": 398,
+      "y": 96,
+      "w": 184,
+      "h": 61.5
+    },
+    {
+      "kind": "text",
+      "text": "Fig. 3. RTO location monitoring in Rajkot with demo markers. Map data \u00a9 OpenStreetMap contributors. OpenFreeMap / OpenMapTiles.",
+      "x": 398,
+      "y": 159,
+      "w": 184,
+      "h": 11,
+      "size": 10.3
+    },
+    {
+      "kind": "image",
+      "file": "website-evidence.png",
+      "x": 398,
+      "y": 173,
+      "w": 89,
+      "h": 33
+    },
+    {
+      "kind": "image",
+      "file": "website-tax.png",
+      "x": 493,
+      "y": 173,
+      "w": 89,
+      "h": 33
+    },
+    {
+      "kind": "text",
+      "text": "Applications \u00b7 private evidence preview",
+      "x": 398,
+      "y": 208,
+      "w": 89,
+      "h": 8,
+      "size": 10.2
+    },
+    {
+      "kind": "text",
+      "text": "Financial intelligence \u00b7 Tax Review",
+      "x": 493,
+      "y": 208,
+      "w": 89,
+      "h": 8,
+      "size": 10.2
+    },
+    {
+      "kind": "text",
+      "text": "07",
+      "x": 398,
+      "y": 220,
+      "w": 12,
+      "h": 9,
+      "size": 17
+    },
+    {
+      "kind": "text",
+      "text": "WEBSITE MODULE FLOW",
+      "x": 412,
+      "y": 220,
+      "w": 170,
+      "h": 9,
+      "size": 18
+    },
+    {
+      "kind": "text",
+      "text": "OWNER WORKSPACE",
+      "x": 401,
+      "y": 236,
+      "w": 82,
+      "h": 6,
+      "size": 13
+    },
+    {
+      "kind": "text",
+      "text": "Overview \u00b7 Applications \u00b7 device claim\nMy vehicles \u00b7 mounting confirmation\nCompliance & Tax",
+      "x": 401,
+      "y": 243,
+      "w": 82,
+      "h": 13,
+      "size": 10.5
+    },
+    {
+      "kind": "text",
+      "text": "DEVICE TELEMETRY",
+      "x": 497,
+      "y": 236,
+      "w": 82,
+      "h": 6,
+      "size": 13
+    },
+    {
+      "kind": "text",
+      "text": "Signed motion + device GNSS\nDevice health \u00b7 Hardware simulator",
+      "x": 497,
+      "y": 243,
+      "w": 82,
+      "h": 13,
+      "size": 10.5
+    },
+    {
+      "kind": "text",
+      "text": "RTO APPLICATIONS & REGISTRY",
+      "x": 401,
+      "y": 266,
+      "w": 178,
+      "h": 6,
+      "size": 13
+    },
+    {
+      "kind": "text",
+      "text": "Document preview \u00b7 Vehicle registry \u00b7 Non-Use declarations",
+      "x": 401,
+      "y": 273,
+      "w": 178,
+      "h": 9,
+      "size": 10.5
+    },
+    {
+      "kind": "text",
+      "text": "LOCATION MONITORING",
+      "x": 401,
+      "y": 290,
+      "w": 178,
+      "h": 6,
+      "size": 13
+    },
+    {
+      "kind": "text",
+      "text": "Parking geofence \u00b7 Alerts & events \u00b7 Movement requests",
+      "x": 401,
+      "y": 297,
+      "w": 178,
+      "h": 9,
+      "size": 10.5
+    },
+    {
+      "kind": "text",
+      "text": "INVESTIGATIONS \u2192 FINANCIAL INTELLIGENCE",
+      "x": 401,
+      "y": 314,
+      "w": 178,
+      "h": 6,
+      "size": 13
+    },
+    {
+      "kind": "text",
+      "text": "Evidence review \u2192 calculation \u2192 owner response \u2192 decision",
+      "x": 401,
+      "y": 321,
+      "w": 178,
+      "h": 9,
+      "size": 10.5
+    },
+    {
+      "kind": "text",
+      "text": "ADMINISTRATION & OVERSIGHT",
+      "x": 401,
+      "y": 338,
+      "w": 178,
+      "h": 6,
+      "size": 13
+    },
+    {
+      "kind": "text",
+      "text": "Tax rule registry \u00b7 Revenue intelligence\nReports & exports \u00b7 Audit trail \u00b7 Team & access\nStates & territories \u00b7 RTO offices",
+      "x": 401,
+      "y": 345,
+      "w": 178,
+      "h": 14,
+      "size": 10.5
+    },
+    {
+      "kind": "text",
+      "text": "Shared services   /   Next.js API \u00b7 Supabase and PostgreSQL\nPrivate documents \u00b7 Role-based access \u00b7 Signed event history [6]",
+      "x": 398,
+      "y": 362,
+      "w": 184,
+      "h": 10,
+      "size": 10.4
+    },
+    {
+      "kind": "text",
+      "text": "SELECTED REFERENCES",
+      "x": 12,
+      "y": 379,
+      "w": 184,
+      "h": 6,
+      "size": 11.7
+    },
+    {
+      "kind": "text",
+      "text": "[1] Team VahikIN., \u201cPS000225 requirements, implementation and demo tax methodology,\u201d project repository, 2026.",
+      "x": 12,
+      "y": 386.0,
+      "w": 376,
+      "h": 4.2,
+      "size": 9.8
+    },
+    {
+      "kind": "text",
+      "text": "[2] Waveshare, \u201cESP32-S3-Touch-AMOLED-2.06,\u201d board documentation and examples.",
+      "x": 12,
+      "y": 390.1,
+      "w": 376,
+      "h": 4.2,
+      "size": 9.8
+    },
+    {
+      "kind": "text",
+      "text": "[3] Espressif Systems, \u201cESP32-S3 Series Datasheet,\u201d ver. 2.2.",
+      "x": 12,
+      "y": 394.2,
+      "w": 376,
+      "h": 4.2,
+      "size": 9.8
+    },
+    {
+      "kind": "text",
+      "text": "[4] Government of Gujarat, Gujarat Motor Vehicles Tax Act, 1958, \u00a7\u00a7 3 and 18, India Code.",
+      "x": 12,
+      "y": 398.3,
+      "w": 376,
+      "h": 4.2,
+      "size": 9.8
+    },
+    {
+      "kind": "text",
+      "text": "[5] Government of Gujarat, Bombay Motor Vehicles Tax Rules, 1959, Rule 5 and Form NT, India Code.",
+      "x": 12,
+      "y": 402.4,
+      "w": 376,
+      "h": 4.2,
+      "size": 9.8
+    },
+    {
+      "kind": "text",
+      "text": "[6] Supabase, \u201cRow Level Security,\u201d developer documentation.",
+      "x": 12,
+      "y": 406.5,
+      "w": 376,
+      "h": 4.2,
+      "size": 9.8
+    },
+    {
+      "kind": "image",
+      "file": "github-qr.png",
+      "x": 422,
+      "y": 377,
+      "w": 29,
+      "h": 29
+    },
+    {
+      "kind": "text",
+      "text": "SOURCE CODE",
+      "x": 407.5,
+      "y": 407,
+      "w": 58,
+      "h": 5.5,
+      "size": 10
+    },
+    {
+      "kind": "image",
+      "file": "research-qr.png",
+      "x": 514,
+      "y": 377,
+      "w": 29,
+      "h": 29
+    },
+    {
+      "kind": "text",
+      "text": "RESEARCH MATERIAL",
+      "x": 499.5,
+      "y": 407,
+      "w": 58,
+      "h": 5.5,
+      "size": 10
+    },
+    {
+      "kind": "text",
+      "text": "SFIC 2026  /  27 NOV 2026  /  RESEARCH PROTOTYPE  /  A1 LANDSCAPE \u00b7 841 \u00d7 594 mm",
+      "x": 12,
+      "y": 413,
+      "w": 570,
+      "h": 4.4,
+      "size": 8.7
+    }
+  ]
+}
