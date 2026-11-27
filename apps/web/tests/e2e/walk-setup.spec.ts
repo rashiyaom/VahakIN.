@@ -1,0 +1,23 @@
+import {test,expect} from '@playwright/test';
+import {readFileSync} from 'node:fs';
+test('real RTO sees setup and pairing, public tracking rejects missing token',async({page})=>{
+ page.on('pageerror',e=>console.log('Page error:',e.message));
+ const credentials=JSON.parse(readFileSync('.provisioned/exhibition-login.json','utf8'));
+ const password=credentials.password??credentials.government?.password;
+ expect(password).toBeTruthy();
+ const login=await page.request.post('/api/session',{headers:{Origin:process.env.VAHAKIN_TEST_URL||'http://localhost:3000'},data:{email:'rashiyaom@gmail.com',password,portal:'government'}});
+ expect(login.status(),await login.text()).toBe(200);
+ await page.goto('/gov/tracking');
+ await expect(page.getByRole('heading',{name:'Plus · live walking demonstration'})).toBeVisible();
+ await expect(page.getByText('GJ-21 · Gandhinagar',{exact:true}).first()).toBeVisible();
+ await page.getByLabel('Centre source').selectOption('custom');
+ await page.getByLabel('Geofence radius (metres)').fill('125');
+ await expect(page.getByLabel('Centre latitude')).toBeVisible();
+ await page.getByLabel('Centre latitude').fill('23.23127');
+ await page.getByLabel('Centre longitude').fill('72.63359');
+ await expect(page.getByRole('button',{name:'Save geofence & start walk'})).toBeEnabled();
+ const invalid=await page.request.post('/api/walk',{headers:{Origin:process.env.VAHAKIN_TEST_URL||'http://localhost:3000'},data:{action:'start',centre:'custom',lat:23.23,lng:72.63,radiusM:-1}});expect(invalid.status()).toBe(400);
+ const state=await page.request.get('/api/walk');expect(state.status()).toBe(200);expect((await state.json()).admin).toBe(true);
+ const tracking=await page.request.get('/api/walk/live');expect(tracking.status()).toBe(403);
+ await page.setViewportSize({width:390,height:844});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+});

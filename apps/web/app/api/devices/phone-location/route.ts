@@ -17,7 +17,7 @@ export async function POST(request:Request){
     let raw;try{raw=JSON.parse(bytes.toString("utf8"));}catch{throw new EnrollmentError("Invalid location message.");}
     const parsed=phoneLocationSchema.safeParse(raw);if(!parsed.success)throw new EnrollmentError("Invalid phone location or consent.");
     const input=parsed.data;
-    if(account.mode==="live"&&!await limitAttempts(`phone-location:${account.id}`,240,900))throw new EnrollmentError("Too many location updates. Wait before retrying.",429);
+    if(account.mode==="live"&&!await limitAttempts(`phone-location:${account.id}`,600,900))throw new EnrollmentError("Too many location updates. Wait before retrying.",429);
     const update=(store:DemoStore)=>{
       const vehicle=store.vehicles.find(v=>v.id===input.vehicleId&&v.ownerId===account.id);
       const app=store.enrollment?.applications.find(a=>a.vehicleId===vehicle?.id&&a.ownerId===account.id);

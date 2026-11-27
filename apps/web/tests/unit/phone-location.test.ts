@@ -23,7 +23,7 @@ describe("Plus explicit phone location",()=>{
   const f=fixture();f.start();const sample=f.sample();
   expect(()=>applyPhoneLocation(f.account,f.vehicle,f.app,sample,now+16000)).toThrow(/stale/);
   expect(()=>applyPhoneLocation(f.account,f.vehicle,f.app,sample,now+61000)).toThrow(/expired/);
-  applyPhoneLocation(f.account,f.vehicle,f.app,f.sample(now,100),now);expect(f.vehicle.gpsStatus).toBe("Unavailable");expect(f.vehicle.lat).toBeUndefined();
+  applyPhoneLocation(f.account,f.vehicle,f.app,f.sample(now,100),now);expect(f.vehicle.gpsStatus).toBe("Unavailable");expect(f.vehicle.lat).toBe(22.303);expect(f.vehicle.accuracy).toBe(100);expect(f.vehicle.geofence).toBe("Unknown");
   applyPhoneLocation(f.account,f.vehicle,f.app,{action:"stop",vehicleId:f.vehicle.id,sessionId:f.vehicle.phoneLocationSession!.id},now);
   expect(()=>applyPhoneLocation(f.account,f.vehicle,f.app,sample,now)).toThrow(/stopped/);
  });

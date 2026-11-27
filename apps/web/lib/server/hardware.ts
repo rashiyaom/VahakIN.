@@ -8,7 +8,7 @@ const finite = z.number().finite();
 export const hardwareSchema = z.object({
   deviceId: z.string().regex(/^IG-[A-Z0-9-]{4,80}$/), timestamp: finite.int().positive(), nonce: z.string().uuid(),
   firmware: z.enum(["hotspot-imu-1.0.0", "plus-watch-1.0.0"]), uptimeMs: finite.int().nonnegative().max(4294967295),
-  imu: z.object({ state: z.enum(["Calibrating", "Stationary", "Moving", "Sensor fault"]), accelerationG: finite.min(0).max(16), rotationDps: finite.min(0).max(2000), qualifiedMotionMs: finite.int().min(0).max(60000), movementId: z.string().uuid().nullable(), movementAt: finite.int().positive().nullable() }).strict(),
+  imu: z.object({ handling:z.boolean().optional(), state: z.enum(["Calibrating", "Stationary", "Moving", "Sensor fault"]), accelerationG: finite.min(0).max(16), rotationDps: finite.min(0).max(2000), qualifiedMotionMs: finite.int().min(0).max(60000), movementId: z.string().uuid().nullable(), movementAt: finite.int().positive().nullable() }).strict(),
   gps: z.object({ lat: finite.min(-90).max(90), lng: finite.min(-180).max(180), hdop: finite.min(0.1).max(99), satellites: finite.int().min(0).max(99), fixAt: finite.int().positive() }).strict().nullable(),
 }).strict().superRefine((v,ctx)=>{
   if ((v.imu.movementId === null) !== (v.imu.movementAt === null)) ctx.addIssue({code:"custom",message:"Incomplete movement evidence"});

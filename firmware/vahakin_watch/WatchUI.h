@@ -150,7 +150,7 @@ static void power(){
  value=text(root,"--",64,164,100,&lv_font_montserrat_32,kLime);center(value);
  text(root,"Motion wake",210,143,180,&lv_font_montserrat_20);
  text(root,"Always ready.\nOnly on when\nyou move.",210,179,170,&lv_font_montserrat_16,kMuted);
- auto*c=box(root,26,283,358,65);text(c,"Sleep after",18,21,240,&lv_font_montserrat_20);text(c,"5 sec",262,21,85,&lv_font_montserrat_20,kLime);
+ auto*c=box(root,26,283,358,65);text(c,"Sleep after",18,21,240,&lv_font_montserrat_20);text(c,"30 sec",262,21,85,&lv_font_montserrat_20,kLime);
  text(root,"Brightness",30,366,350,&lv_font_montserrat_16,kMuted);
  auto*s=lv_slider_create(root);lv_obj_set_pos(s,38,403);lv_obj_set_size(s,334,10);lv_slider_set_range(s,15,100);lv_slider_set_value(s,brightness,LV_ANIM_OFF);
  lv_obj_set_style_bg_color(s,color(kLime),LV_PART_INDICATOR);lv_obj_set_style_bg_color(s,color(kWhite),LV_PART_KNOB);

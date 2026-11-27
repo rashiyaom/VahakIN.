@@ -234,13 +234,16 @@ void loop(){
   char movedAt[32];if(m.at)snprintf(movedAt,sizeof(movedAt),"%lld",(long long)m.at);else strcpy(movedAt,"null");
   int length=snprintf(body,sizeof(body),"{\"deviceId\":\"%s\",\"timestamp\":%lld,\"nonce\":\"%s\",\"firmware\":\"%s\",\"uptimeMs\":%lu,\"imu\":{\"state\":\"%s\",\"accelerationG\":%.4f,\"rotationDps\":%.3f,\"qualifiedMotionMs\":%lu,\"movementId\":%s,\"movementAt\":%s},\"gps\":%s}",DEVICE_ID,(long long)pendingAt,nonce,FIRMWARE,(unsigned long)now,state,s.acceleration,s.rotation,(unsigned long)(m.at?m.duration:s.qualified),movement.c_str(),movedAt,gps);
   if(length<0||length>=int(sizeof(body))){Serial.println("Telemetry buffer exceeded");return;}pending=body;
+  #ifdef VAHAKIN_HANDLING_ALARM
+  pending.replace("\"imu\":{",String("\"imu\":{\"handling\":")+(VAHAKIN_HANDLING_ALARM?"true,":"false,"));
+  #endif
  }
  WiFiClient plain;WiFiClientSecure secure;HTTPClient http;String url=TELEMETRY_URL;bool begun=false;
  if(url.startsWith("https://")&&strlen(ROOT_CA)>0){secure.setCACert(ROOT_CA);begun=http.begin(secure,url);}
  else if(ALLOW_LOCAL_HTTP&&localEndpoint(url))begun=http.begin(plain,url);
  if(!begun){Serial.println("Configure a private LAN HTTP endpoint or verified HTTPS CA.");retryDelay=60000;return;}
  #ifdef VAHAKIN_EXTERNAL_SENSOR
- http.setConnectTimeout(1200);http.setTimeout(1500);
+ http.setConnectTimeout(8000);http.setTimeout(8000);secure.setHandshakeTimeout(10);
  #else
  http.setConnectTimeout(3000);http.setTimeout(4000);
  #endif

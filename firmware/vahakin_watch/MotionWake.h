@@ -6,7 +6,7 @@
 // Touch deliberately does not extend this timer. Unsigned elapsed handles rollover.
 class MotionWake {
  public:
-  static constexpr uint32_t idleMs = 5000;
+  static constexpr uint32_t idleMs = 30000;
   static constexpr uint8_t thresholdMg = 180;
   void start(uint32_t now) { lastMotion = now; seeded = false; streak = 0; }
   bool sample(uint32_t now, float x, float y, float z, float gx, float gy, float gz) {

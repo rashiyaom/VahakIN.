@@ -33,15 +33,16 @@ export function applyPhoneLocation(account:Account,vehicle:Vehicle,app:Enrollmen
   if(vehicle.gpsAt&&Date.parse(vehicle.gpsAt)>=input.timestamp)return {sessionId:session.id,alerts,status:"Repeated or older location ignored"};
   session.expiresAt=now+60000;
   vehicle.locationSource="PHONE_BROWSER";
+  vehicle.lat=input.lat;vehicle.lng=input.lng;vehicle.accuracy=input.accuracy;vehicle.gpsAt=new Date(input.timestamp).toISOString();
   if(input.accuracy>30) {
     vehicle.gpsStatus="Unavailable";vehicle.geofence="Unknown";vehicle.fenceCandidate=undefined;
-    return {sessionId:session.id,alerts,status:"Phone accuracy is too low; move outdoors and keep sharing"};
+    return {sessionId:session.id,alerts,status:`Approximate phone position (±${Math.round(input.accuracy)} m) shown on map; move outdoors for geofence accuracy`};
   }
   vehicle.lat=input.lat;vehicle.lng=input.lng;vehicle.accuracy=input.accuracy;vehicle.gpsAt=new Date(input.timestamp).toISOString();vehicle.gpsStatus="Phone-provided location";vehicle.speed=null;
   // Never turn a phone fix into a device heartbeat or claim the watch itself has GPS.
   const fence=vehicle.geofenceConfig;
   if(!fence?.enabled){vehicle.geofence="Unknown";return {sessionId:session.id,alerts,status:"Phone location received; no geofence enabled"};}
-  const distance=distanceMetres(fence.lat,fence.lng,input.lat,input.lng),buffer=Math.max(25,input.accuracy);
+  const distance=distanceMetres(fence.lat,fence.lng,input.lat,input.lng),buffer=Math.max(fence.radiusM<=75?8:25,input.accuracy);
   vehicle.fenceDistanceM=Math.round(distance);
   const side=distance>fence.radiusM+buffer?"Outside":distance<Math.max(0,fence.radiusM-buffer)?"Inside":"Boundary";
   if(side==="Boundary"){vehicle.geofence=side;vehicle.fenceCandidate=undefined;return {sessionId:session.id,alerts,status:"Phone is near the boundary; exit not established"};}

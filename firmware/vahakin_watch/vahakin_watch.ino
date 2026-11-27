@@ -9,11 +9,16 @@
 #include <SensorQMI8658.hpp>
 #include <XPowersLib.h>
 #include "MotionWake.h"
+#include "HandlingAlarm.h"
+#include "Siren.h"
+// POC keeps network/IMU alive while the screen sleeps. Restore WoM deep sleep after the walk.
+#define WALK_DEMO_MODE 1
 #include "WatchUI.h"
 
 // Reuse the provisioned Plus identity and signed upload queue, never fixture GPS.
 #define VAHAKIN_PLUS 1
 #define VAHAKIN_EXTERNAL_SENSOR 1
+#define VAHAKIN_HANDLING_ALARM sirenOn.load()
 #if __has_include("config.local.h")
 #include "config.local.h"
 #else
@@ -35,6 +40,24 @@ std::shared_ptr<Arduino_IIC_DriveBus> touchBus=std::make_shared<Arduino_HWIIC>(1
 void touchIRQ(){}
 Arduino_FT3x68 touch(touchBus,FT3168_DEVICE_ADDRESS,9,38,touchIRQ);
 MotionWake motionWake;
+HandlingAlarm handling;
+bool handlingSaved=false;
+struct GyroZero {
+ unsigned count=0;bool ready=false;float x=0,y=0,z=0,px=0,py=0,pz=0,ax=0,ay=0,az=0;
+ bool apply(float a,float b,float c,float &gx,float &gy,float &gz){
+  if(!ready){
+   float norm=sqrtf(a*a+b*b+c*c);
+   bool quiet=fabsf(norm-1)<.06f&&sqrtf(gx*gx+gy*gy+gz*gz)<8&&(!count||(fabsf(a-ax)+fabsf(b-ay)+fabsf(c-az)<.035f&&fabsf(gx-px)+fabsf(gy-py)+fabsf(gz-pz)<4));
+   ax=a;ay=b;az=c;px=gx;py=gy;pz=gz;
+   if(!quiet){count=0;x=y=z=0;return false;}
+   x+=gx;y+=gy;z+=gz;
+   if(++count<250)return false;
+   x/=count;y/=count;z/=count;ready=true;
+   Serial.printf("Stationary gyro bias calibrated: %.2f %.2f %.2f dps\n",x,y,z);
+  }
+  gx-=x;gy-=y;gz-=z;return true;
+ }
+} gyroZero;
 WatchUI::Readings reading;
 RTC_DATA_ATTR uint32_t savedMagic=0;
 RTC_DATA_ATTR uint8_t savedDetector[sizeof(MotionDetector)];
@@ -112,6 +135,13 @@ void sampleSensor(uint32_t now){
   sensorOK=false;reading.imu=false;detector.reset();detector.state=MotionDetector::Fault;return;
  }
  reading.imu=true;
+ if(!gyroZero.apply(reading.ax,reading.ay,reading.az,reading.gx,reading.gy,reading.gz))return;
+ bool previousAlarm=handling.alarm;
+ handling.sample(now,reading.ax,reading.ay,reading.az,reading.gx,reading.gy,reading.gz);
+ sirenOn.store(handling.alarm);
+ if(previousAlarm!=handling.alarm)Serial.printf("Handling alarm=%s; orientation + quiet confirmation\n",handling.alarm?"ON":"OFF");
+ if(handling.calibrated&&!handlingSaved){float baseline[3]={handling.bx,handling.by,handling.bz};preferences.putBytes("mount-vector",baseline,sizeof(baseline));handlingSaved=true;Serial.println("Mount baseline saved; handling alarm armed");}
+
  if(lastSample&&now-lastSample>100)detector.resumeAfterSleep();lastSample=now;
  bool major=motionWake.sample(now,reading.ax,reading.ay,reading.az,reading.gx,reading.gy,reading.gz);
  if(major&&!screenAwake&&displayReady){screenAwake=true;if(panelSleeping){display.displayOn();panelSleeping=false;}display.setBrightness(savedBrightness*255/100);}
@@ -124,6 +154,10 @@ void sampleSensor(uint32_t now){
 }
 bool sleepPrepared=false;
 void sleepWhenStill(){
+ if(WALK_DEMO_MODE||handling.alarm||!handling.calibrated){
+  if(displayReady&&!panelSleeping){display.setBrightness(0);display.displayOff();panelSleeping=true;}screenAwake=false;return;
+ }
+
  if(!sleepPrepared){
   if(displayReady&&!panelSleeping){display.setBrightness(0);display.displayOff();panelSleeping=true;}screenAwake=false;
   // Keep PMU sensor rail powered. WoM itself is low-power accelerometer-only.
@@ -134,7 +168,7 @@ void sleepWhenStill(){
   if(esp_sleep_enable_ext0_wakeup(GPIO_NUM_21,1)!=ESP_OK){Serial.println("Wake pin setup failed");rtc_gpio_deinit(GPIO_NUM_21);sensorOK=initSensor();motionWake.start(millis());return;}
   stopNetwork=true;sleepPrepared=true;
  }
- // Screen is already off at 5 s. Let the bounded in-flight HTTP request finish.
+ // Screen is already off at 30 s. Let the bounded in-flight HTTP request finish.
  if(!networkStopped)return;
  persistEvents();memcpy(savedDetector,&detector,sizeof(detector));savedMagic=0x56415732;
  if(touchOK)touch.IIC_Write_Device_State(touch.Arduino_IIC_Touch::Device::TOUCH_POWER_MODE,touch.Arduino_IIC_Touch::Device_Mode::TOUCH_POWER_HIBERNATE);
@@ -146,22 +180,28 @@ void setup(){
  rtc_gpio_deinit(GPIO_NUM_21);pinMode(46,OUTPUT);digitalWrite(46,LOW);
  transportSetup(); // Wi-Fi, NTP, durable event queue; sampling is owned by this sketch.
  sensorOK=initSensor();powerOK=power.init(Wire,15,14);
+ float baseline[3];if(preferences.getBytesLength("mount-vector")==sizeof(baseline)&&preferences.getBytes("mount-vector",baseline,sizeof(baseline))==sizeof(baseline)){
+  float norm=sqrtf(baseline[0]*baseline[0]+baseline[1]*baseline[1]+baseline[2]*baseline[2]);if(isfinite(norm)&&fabsf(norm-1)<.1f){handling.bx=baseline[0];handling.by=baseline[1];handling.bz=baseline[2];handling.calibrated=true;handlingSaved=true;}
+ }
+ sirenReady=initSiren();Serial.printf("Siren audio=%s; keep watch still 5 s on first placement\n",sirenReady?"ready":"unavailable");
  if(powerOK){power.enableBattDetection();power.enableBattVoltageMeasure();}
  bool motionBoot=esp_sleep_get_wakeup_cause()==ESP_SLEEP_WAKEUP_EXT0;
- detector.setCalibrationSamples(100); // Two quiet seconds fit within the five-second awake window.
+ detector.setCalibrationSamples(100); // Two quiet seconds initialise motion tracking; handling calibration independently needs five.
  if(motionBoot&&savedMagic==0x56415732){memcpy(&detector,savedDetector,sizeof(detector));detector.resumeAfterSleep();}
- initDisplay();motionWake.start(millis());screenAwake=motionBoot;
+ initDisplay();motionWake.start(millis());screenAwake=true;
  if(screenAwake&&displayReady)display.setBrightness(savedBrightness*255/100);
  if(xTaskCreatePinnedToCore(networkTask,"plus-network",12288,nullptr,1,nullptr,0)!=pdPASS){networkStopped=true;Serial.println("Network task unavailable");}
  Serial.println("VahakIN Plus UI ready; move to wake. GPS payload is always null.");
 }
 void loop(){
  uint32_t now=millis();
+ static uint32_t diagnosticAt=0;
+ if(now-diagnosticAt>=10000){diagnosticAt=now;Serial.printf("Watch IP=%s gateway=%s accel=%.3f,%.3f,%.3f gyro=%.2f,%.2f,%.2f sensor=%d calibrated=%d\n",WiFi.localIP().toString().c_str(),WiFi.gatewayIP().toString().c_str(),reading.ax,reading.ay,reading.az,reading.gx,reading.gy,reading.gz,int(sensorOK),int(handling.calibrated));}
  if(sleepPrepared){sleepWhenStill();delay(5);return;}
  static uint32_t sampleDue=0;
  if(now-sampleDue>=20){sampleDue=now;sampleSensor(now);}
  if(now-lastPersist>=1000){lastPersist=now;persistEvents();}
- if(motionWake.expired(now)){sleepWhenStill();return;}
+ if(!WALK_DEMO_MODE&&motionWake.expired(now)){sleepWhenStill();if(!WALK_DEMO_MODE&&!handling.alarm&&handling.calibrated)return;}
  if(now-lastPower>=1000){
   lastPower=now;reading.battery=powerOK&&power.isBatteryConnect()?power.getBatteryPercent():-1;reading.charging=powerOK&&power.isCharging();
   if(clockReady()){time_t local=time(nullptr)+19800;tm t;gmtime_r(&local,&t);strftime(timeText,sizeof(timeText),"%H:%M",&t);}reading.clock=timeText;

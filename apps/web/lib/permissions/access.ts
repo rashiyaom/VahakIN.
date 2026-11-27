@@ -43,6 +43,7 @@ export const navigation = [
  {id:"states",label:"States & territories",permission:"states.read",group:"Workspace"},
  {id:"offices",label:"RTO offices",permission:"offices.read",group:"Workspace"},
  {id:"applications",label:"Applications",permission:"applications.read",group:"Workspace"},
+ {id:"tracking",label:"Live walking demo",permission:"locations.read",group:"Workspace"},
  {id:"vehicles",label:"Vehicle registry",permission:"vehicles.read",group:"Workspace"},
  {id:"monitoring",label:"Location monitoring",permission:"locations.read",group:"Workspace"},
  {id:"declarations",label:"Non-Use declarations",permission:"declarations.read",group:"Workspace"},

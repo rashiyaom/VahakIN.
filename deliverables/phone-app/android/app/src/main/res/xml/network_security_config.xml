@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Allow cleartext HTTP to any private RFC-1918 address.
+  The VahakIN server runs on the laptop over the same Wi-Fi / hotspot.
+  HTTPS is optional (see prepare-phone-https.py) but HTTP works for local demos.
+-->
+<network-security-config>
+    <!-- Trust system + user-installed CAs (lets you install rootCA.crt from prepare-phone-https.py) -->
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <certificates src="system" />
+            <certificates src="user" />
+        </trust-anchors>
+    </base-config>
+
+    <!-- Explicit cleartext permit for hotspot / LAN ranges -->
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">localhost</domain>
+    </domain-config>
+</network-security-config>

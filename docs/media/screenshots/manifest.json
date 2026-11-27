@@ -1,0 +1,209 @@
+[
+  {
+    "name": "home",
+    "url": "/",
+    "capturedAt": "2026-11-27T10:28:33.403Z"
+  },
+  {
+    "name": "login-owner",
+    "url": "/login/owner",
+    "capturedAt": "2026-11-27T10:28:35.863Z"
+  },
+  {
+    "name": "login-government",
+    "url": "/login/government",
+    "capturedAt": "2026-11-27T10:28:38.313Z"
+  },
+  {
+    "name": "demo-roles",
+    "url": "/demo",
+    "capturedAt": "2026-11-27T10:28:41.709Z"
+  },
+  {
+    "name": "reset-password",
+    "url": "/auth/reset-password",
+    "capturedAt": "2026-11-27T10:28:44.419Z"
+  },
+  {
+    "name": "gov-overview",
+    "url": "/gov",
+    "capturedAt": "2026-11-27T10:28:47.434Z"
+  },
+  {
+    "name": "gov-vahan-ai",
+    "url": "/gov/vahan-ai",
+    "capturedAt": "2026-11-27T10:28:50.453Z"
+  },
+  {
+    "name": "gov-applications",
+    "url": "/gov/applications",
+    "capturedAt": "2026-11-27T10:28:53.092Z"
+  },
+  {
+    "name": "gov-vehicles",
+    "url": "/gov/vehicles",
+    "capturedAt": "2026-11-27T10:28:55.577Z"
+  },
+  {
+    "name": "gov-monitoring",
+    "url": "/gov/monitoring",
+    "capturedAt": "2026-11-27T10:28:58.022Z"
+  },
+  {
+    "name": "gov-declarations",
+    "url": "/gov/declarations",
+    "capturedAt": "2026-11-27T10:29:00.458Z"
+  },
+  {
+    "name": "gov-alerts",
+    "url": "/gov/alerts",
+    "capturedAt": "2026-11-27T10:29:02.873Z"
+  },
+  {
+    "name": "gov-investigations",
+    "url": "/gov/investigations",
+    "capturedAt": "2026-11-27T10:29:05.316Z"
+  },
+  {
+    "name": "gov-requests",
+    "url": "/gov/requests",
+    "capturedAt": "2026-11-27T10:29:07.751Z"
+  },
+  {
+    "name": "gov-devices",
+    "url": "/gov/devices",
+    "capturedAt": "2026-11-27T10:29:10.200Z"
+  },
+  {
+    "name": "gov-employees",
+    "url": "/gov/employees",
+    "capturedAt": "2026-11-27T10:29:12.606Z"
+  },
+  {
+    "name": "gov-compliance",
+    "url": "/gov/compliance",
+    "capturedAt": "2026-11-27T10:29:15.354Z"
+  },
+  {
+    "name": "gov-revenue",
+    "url": "/gov/revenue",
+    "capturedAt": "2026-11-27T10:29:17.788Z"
+  },
+  {
+    "name": "gov-tax-rules",
+    "url": "/gov/tax-rules",
+    "capturedAt": "2026-11-27T10:29:20.178Z"
+  },
+  {
+    "name": "gov-reports",
+    "url": "/gov/reports",
+    "capturedAt": "2026-11-27T10:29:22.701Z"
+  },
+  {
+    "name": "gov-audit",
+    "url": "/gov/audit",
+    "capturedAt": "2026-11-27T10:29:25.393Z"
+  },
+  {
+    "name": "owner-overview",
+    "url": "/owner",
+    "capturedAt": "2026-11-27T10:29:40.067Z"
+  },
+  {
+    "name": "owner-vahan-ai",
+    "url": "/owner/vahan-ai",
+    "capturedAt": "2026-11-27T10:29:42.502Z"
+  },
+  {
+    "name": "owner-applications",
+    "url": "/owner/applications",
+    "capturedAt": "2026-11-27T10:29:44.844Z"
+  },
+  {
+    "name": "owner-vehicles",
+    "url": "/owner/vehicles",
+    "capturedAt": "2026-11-27T10:29:47.220Z"
+  },
+  {
+    "name": "owner-monitoring",
+    "url": "/owner/monitoring",
+    "capturedAt": "2026-11-27T10:29:49.626Z"
+  },
+  {
+    "name": "owner-declarations",
+    "url": "/owner/declarations",
+    "capturedAt": "2026-11-27T10:29:51.976Z"
+  },
+  {
+    "name": "owner-alerts",
+    "url": "/owner/alerts",
+    "capturedAt": "2026-11-27T10:29:54.332Z"
+  },
+  {
+    "name": "owner-requests",
+    "url": "/owner/requests",
+    "capturedAt": "2026-11-27T10:29:56.694Z"
+  },
+  {
+    "name": "owner-compliance",
+    "url": "/owner/compliance",
+    "capturedAt": "2026-11-27T10:29:59.071Z"
+  },
+  {
+    "name": "owner-reports",
+    "url": "/owner/reports",
+    "capturedAt": "2026-11-27T10:30:01.403Z"
+  },
+  {
+    "name": "owner-onboarding",
+    "url": "/owner/onboarding",
+    "capturedAt": "2026-11-27T10:30:04.363Z"
+  },
+  {
+    "name": "ops-overview",
+    "url": "/ops",
+    "capturedAt": "2026-11-27T10:30:07.421Z"
+  },
+  {
+    "name": "ops-devices",
+    "url": "/ops/devices",
+    "capturedAt": "2026-11-27T10:30:09.837Z"
+  },
+  {
+    "name": "ops-simulator",
+    "url": "/ops/simulator",
+    "capturedAt": "2026-11-27T10:30:12.215Z"
+  },
+  {
+    "name": "ops-audit",
+    "url": "/ops/audit",
+    "capturedAt": "2026-11-27T10:30:14.585Z"
+  },
+  {
+    "name": "national-overview",
+    "url": "/gov",
+    "capturedAt": "2026-11-27T10:30:17.034Z"
+  },
+  {
+    "name": "national-states",
+    "url": "/gov/states",
+    "capturedAt": "2026-11-27T10:30:19.386Z"
+  },
+  {
+    "name": "national-offices",
+    "url": "/gov/offices",
+    "capturedAt": "2026-11-27T10:30:21.743Z"
+  },
+  {
+    "name": "gov-tracking",
+    "url": "/gov/tracking",
+    "capturedAt": "2026-11-27T10:31:28.388Z",
+    "note": "Actual registered POC workspace; pairing QR masked if present."
+  },
+  {
+    "name": "tracking-link-expired",
+    "url": "/track",
+    "capturedAt": "2026-11-27T10:31:30.972Z",
+    "note": "No private tracking token supplied; expired/unavailable state."
+  }
+]

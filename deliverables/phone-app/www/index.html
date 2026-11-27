@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>VahakIN Plus — Hotspot Companion</title>
+  <style>
+    :root {
+      --bg: #090e0b;
+      --card-bg: #121814;
+      --card-border: #1f2821;
+      --input-bg: #17201a;
+      --input-border: #2c3a2f;
+      --text: #f0f5ec;
+      --text-muted: #95a396;
+      --lime: #d4f590;
+      --lime-dark: #122111;
+      --accent-blue: #72b4f5;
+      --danger: #ff6b6b;
+      --success: #52e185;
+      --warning: #f5c542;
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body {
+      margin: 0;
+      padding: env(safe-area-inset-top, 20px) 16px env(safe-area-inset-bottom, 24px) 16px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .header {
+      padding-top: 16px;
+      margin-bottom: 24px;
+    }
+    .badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: var(--lime);
+      background: rgba(212, 245, 144, 0.1);
+      border: 1px solid rgba(212, 245, 144, 0.25);
+      border-radius: 20px;
+      padding: 4px 10px;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+    }
+    h1 {
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: -1px;
+      margin: 0 0 6px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    h1 span { color: var(--lime); }
+    .lead {
+      color: var(--text-muted);
+      font-size: 14px;
+      line-height: 1.5;
+      margin: 0;
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 20px;
+      margin-bottom: 18px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+    .input-group {
+      position: relative;
+      display: flex;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+    input[type="text"], input[type="url"] {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1px solid var(--input-border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      font-size: 16px;
+      color: var(--text);
+      font-family: monospace;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    input[type="text"]:focus, input[type="url"]:focus {
+      border-color: var(--lime);
+      box-shadow: 0 0 0 2px rgba(212, 245, 144, 0.2);
+    }
+    .presets {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+    .preset-btn {
+      background: #18221b;
+      border: 1px solid #233127;
+      color: #d8e2d7;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 13px;
+      cursor: pointer;
+      text-align: left;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .preset-btn:active {
+      background: #233127;
+      border-color: var(--lime);
+    }
+    .preset-btn code {
+      font-size: 12px;
+      color: var(--lime);
+      background: rgba(212, 245, 144, 0.08);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    .status-box {
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-bottom: 18px;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #17201a;
+      border: 1px solid #27342a;
+    }
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #738075;
+      flex-shrink: 0;
+    }
+    .status-dot.success { background: var(--success); box-shadow: 0 0 10px var(--success); }
+    .status-dot.danger { background: var(--danger); box-shadow: 0 0 10px var(--danger); }
+    .status-dot.checking { background: var(--warning); animation: pulse 1s infinite alternate; }
+    @keyframes pulse { from { opacity: 0.4; } to { opacity: 1; } }
+    .btn-row {
+      display: flex;
+      gap: 10px;
+    }
+    button.primary {
+      flex: 2;
+      background: var(--lime);
+      color: #0b140c;
+      font-weight: 700;
+      font-size: 15px;
+      border: none;
+      border-radius: 12px;
+      padding: 14px 18px;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(212, 245, 144, 0.25);
+      transition: transform 0.1s, opacity 0.15s;
+    }
+    button.primary:active {
+      transform: scale(0.98);
+      opacity: 0.9;
+    }
+    button.secondary {
+      flex: 1;
+      background: #1e2821;
+      color: #e5ede2;
+      font-weight: 600;
+      font-size: 14px;
+      border: 1px solid #2b3a30;
+      border-radius: 12px;
+      padding: 14px;
+      cursor: pointer;
+    }
+    button.secondary:active {
+      background: #26332a;
+    }
+    .auto-connect-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 14px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .auto-connect-toggle input {
+      accent-color: var(--lime);
+      width: 16px;
+      height: 16px;
+    }
+    .instructions {
+      background: rgba(18, 24, 20, 0.6);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 14px;
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+    .instructions summary {
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--text);
+      outline: none;
+      user-select: none;
+    }
+    .instructions pre {
+      background: #090e0b;
+      padding: 8px 10px;
+      border-radius: 8px;
+      overflow-x: auto;
+      color: var(--lime);
+      font-size: 11px;
+      margin: 8px 0;
+    }
+    .footer {
+      text-align: center;
+      font-size: 11px;
+      color: #647366;
+      margin-top: 20px;
+    }
+    /* Floating return helper when running in iframe or redirect mode */
+    #countdown-toast {
+      display: none;
+      background: #1e2e1c;
+      border: 1px solid var(--lime);
+      color: var(--text);
+      padding: 10px 14px;
+      border-radius: 10px;
+      margin-bottom: 14px;
+      font-size: 13px;
+      justify-content: space-between;
+      align-items: center;
+    }
+    #countdown-toast button {
+      background: none;
+      border: 1px solid var(--lime);
+      color: var(--lime);
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 11px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div>
+    <div class="header">
+      <div class="badge">Hotspot Companion · Android</div>
+      <h1>Vahak<span>IN.</span></h1>
+      <p class="lead">Declared Non-Use & Telemetry Verification. Connect phone to laptop over hotspot/Wi-Fi to share GPS and view monitoring.</p>
+    </div>
+
+    <div id="countdown-toast">
+      <span id="countdown-text">Connecting in 2s…</span>
+      <button onclick="cancelCountdown()">Cancel</button>
+    </div>
+
+    <div class="card">
+      <label for="server-url">Laptop Server URL</label>
+      <div class="input-group">
+        <input type="url" id="server-url" placeholder="http://10.232.124.31:3000" spellcheck="false" autocomplete="off" autocapitalize="none">
+      </div>
+
+      <label>Quick Presets</label>
+      <div class="presets">
+        <div class="preset-btn" onclick="applyPreset('http://10.232.124.31:3000')">
+          <span>Current Wi-Fi</span>
+          <code>http://10.232.124.31:3000</code>
+        </div>
+        <div class="preset-btn" onclick="applyPreset('http://192.168.43.1:3000')">
+          <span>Phone Hotspot Gateway</span>
+          <code>http://192.168.43.1:3000</code>
+        </div>
+        <div class="preset-btn" onclick="applyPreset('https://10.232.124.31:3443')">
+          <span>Local Demo HTTPS</span>
+          <code>https://10.232.124.31:3443</code>
+        </div>
+      </div>
+
+      <div class="status-box" id="status-box">
+        <div class="status-dot" id="status-dot"></div>
+        <span id="status-text">Enter laptop address and test connection.</span>
+      </div>
+
+      <div class="btn-row">
+        <button class="secondary" type="button" onclick="testConnection()">Ping Test</button>
+        <button class="primary" type="button" id="connect-btn" onclick="connectToServer()">Connect to VahakIN</button>
+      </div>
+
+      <label class="auto-connect-toggle">
+        <input type="checkbox" id="auto-connect-checkbox" checked>
+        Auto-connect on launch if reachable
+      </label>
+    </div>
+
+    <details class="instructions">
+      <summary>Hotspot setup & server commands</summary>
+      <p style="margin: 8px 0 4px 0;">1. Make sure laptop & phone are on the same Wi-Fi / Hotspot.</p>
+      <p style="margin: 4px 0;">2. Start the VahakIN server on your laptop listening on all interfaces:</p>
+      <pre>cd apps/web && npm run dev -- -H 0.0.0.0 -p 3000</pre>
+      <p style="margin: 4px 0;">3. If your laptop IP changed, find it with:</p>
+      <pre>ipconfig getifaddr en0</pre>
+      <p style="margin: 4px 0;">4. In the app, tap <b>Connect to VahakIN</b>. The phone's GPS is ready to stream into the Owner Dashboard.</p>
+    </details>
+  </div>
+
+  <div class="footer">
+    VahakIN Plus · SFIC Problem ID PS000225 · Ready for Android
+  </div>
+
+  <script>
+    const DEFAULT_URL = 'http://10.232.124.31:3000';
+    const input = document.getElementById('server-url');
+    const statusText = document.getElementById('status-text');
+    const statusDot = document.getElementById('status-dot');
+    const autoCheckbox = document.getElementById('auto-connect-checkbox');
+    const countdownToast = document.getElementById('countdown-toast');
+    const countdownText = document.getElementById('countdown-text');
+    let countdownTimer = null;
+
+    // Load saved preferences
+    const savedUrl = localStorage.getItem('vahakin_server_url') || DEFAULT_URL;
+    input.value = savedUrl;
+
+    const savedAuto = localStorage.getItem('vahakin_auto_connect');
+    if (savedAuto !== null) {
+      autoCheckbox.checked = savedAuto === 'true';
+    }
+
+    autoCheckbox.addEventListener('change', () => {
+      localStorage.setItem('vahakin_auto_connect', autoCheckbox.checked);
+    });
+
+    function cleanUrl(val) {
+      val = val.trim();
+      if (!val) return DEFAULT_URL;
+      if (!val.startsWith('http://') && !val.startsWith('https://')) {
+        val = 'http://' + val;
+      }
+      return val.replace(/\/+$/, '');
+    }
+
+    function applyPreset(url) {
+      input.value = url;
+      testConnection();
+    }
+
+    function cancelCountdown() {
+      if (countdownTimer) {
+        clearInterval(countdownTimer);
+        countdownTimer = null;
+      }
+      countdownToast.style.display = 'none';
+      statusText.textContent = 'Auto-connect cancelled. You can edit the IP above.';
+      statusDot.className = 'status-dot';
+    }
+
+    async function testConnection(onSuccess) {
+      const url = cleanUrl(input.value);
+      input.value = url;
+      statusDot.className = 'status-dot checking';
+      statusText.textContent = 'Pinging ' + url + '…';
+
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 4000);
+
+      try {
+        // Probe endpoint
+        const start = Date.now();
+        const resp = await fetch(url + '/api/session', {
+          method: 'GET',
+          signal: controller.signal,
+          mode: 'no-cors'
+        });
+        clearTimeout(timeout);
+        const rtt = Date.now() - start;
+
+        statusDot.className = 'status-dot success';
+        statusText.textContent = `Connected! Server responded in ${rtt}ms.`;
+        if (typeof onSuccess === 'function') onSuccess();
+        return true;
+      } catch (err) {
+        clearTimeout(timeout);
+        statusDot.className = 'status-dot danger';
+        statusText.textContent = 'Cannot reach laptop. Verify Wi-Fi and that server is running with -H 0.0.0.0';
+        return false;
+      }
+    }
+
+    function connectToServer() {
+      const url = cleanUrl(input.value);
+      localStorage.setItem('vahakin_server_url', url);
+      statusDot.className = 'status-dot checking';
+      statusText.textContent = 'Loading ' + url + '…';
+      window.location.replace(url);
+    }
+
+    // Auto-check on launch
+    window.addEventListener('load', () => {
+      if (autoCheckbox.checked) {
+        testConnection(() => {
+          let seconds = 2;
+          countdownToast.style.display = 'flex';
+          countdownText.textContent = `Connecting in ${seconds}s…`;
+          countdownTimer = setInterval(() => {
+            seconds--;
+            if (seconds <= 0) {
+              clearInterval(countdownTimer);
+              connectToServer();
+            } else {
+              countdownText.textContent = `Connecting in ${seconds}s…`;
+            }
+          }, 1000);
+        });
+      }
+    });
+  </script>
+</body>
+</html>

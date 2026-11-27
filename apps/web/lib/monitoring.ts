@@ -2,6 +2,7 @@ export interface GeofenceConfig {
   enabled: boolean; lat: number; lng: number; radiusM: number; version: number; updatedAt: string;
 }
 export interface ImuReading {
+  handling?: boolean;
   state: "Calibrating" | "Stationary" | "Moving" | "Sensor fault";
   accelerationG: number; rotationDps: number; qualifiedMotionMs: number;
   movementId: string | null; movementAt: number | null;

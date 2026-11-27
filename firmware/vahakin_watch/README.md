@@ -90,3 +90,17 @@ Final ESP32-S3 compilation passed: 1,664,259 bytes of app storage (52% of the 3 
 - [QMI8658C datasheet, wake-on-motion section 9](https://files.waveshare.com/wiki/common/QMI8658C.pdf)
 - [Espressif ESP32-S3 sleep modes](https://docs.espressif.com/projects/esp-idf/en/v5.5/esp32s3/api-reference/system/sleep_modes.html)
 - [Mahatma Mandir operator's venue factsheet](https://www.theleela.com/prod/content/assets/2022-10/mahatma-mandir-convention-exhibition-centre-factsheet.pdf)
+
+## Walking POC (2026-11-27)
+
+`HandlingAlarm.h` calibrates after five quiet seconds, persists the mounting gravity vector in NVS, and latches suspected handling from sustained tilt/rotation/acceleration. The ES8311 speaker plays a two-tone alarm; it clears only after five continuous quiet seconds within 12 degrees of the calibrated orientation. This does not prove physical replacement: a contact sensor is needed for that. The baseline can be cleared deliberately by deleting the `mount-vector` NVS key during maintenance; do not erase provisioning to recalibrate.
+
+`WALK_DEMO_MODE=1` keeps IMU and networking awake even when the display goes dark. This is necessary for the live demonstration and consumes more battery than parked deep sleep. Set it to 0 to restore the original WoM sleep path after testing. The watch reports optional `imu.handling` in signed telemetry and never sends fabricated GPS.
+
+The local web worker is started from `apps/web` with `node --env-file=.env.local scripts/walk-bridge.mjs`. Its WhatsApp credentials, configured numbers, QR status, outbox and POC state live in ignored `.provisioned/walk/`. One worker owns state and retries queued messages; a successful send call is not a read receipt. Supabase credentials stay on the laptop. Stop the worker and temporary tunnel after the session. Keep the laptop awake.
+
+Rashiyaom opens `/gov/tracking` to pair the configured WhatsApp sender and set the 50 m reference from a fresh owner phone fix. Devanshi opens `/owner/tracking` via trusted HTTPS and keeps that page visible beside the watch. Existing application approval and placement confirmation are prerequisites. The reference is never guessed from the laptop IP. Boundary uncertainty uses at least 8 m and the phone's reported accuracy; use an outdoor test area. Each confirmed exit/return has a 3-minute allowance. Unknown GPS/IMU pauses the timer. The ₹12/km illustration applies only to accepted travel after the allowance; it is not a statutory fine.
+
+The `/track#TOKEN` link is limited to the active 4-hour session, reveals only that vehicle's POC position/status, and is revoked by stopping the walk. Phone sharing pauses when its page is hidden, including opening WhatsApp on that phone. Use the second phone for viewing alerts during the walk.
+
+Display inactivity is now 30 seconds (`MotionWake::idleMs`). Walking-demo mode keeps networking and IMU sampling active while the screen is off. The alarm-clear quiet period remains five seconds.

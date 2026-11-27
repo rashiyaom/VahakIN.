@@ -1,3 +1,4 @@
+import {readWalk} from "./walk-files";
 // Browsers set Host from the destination and forbid scripts from changing it.
 // Next dev bound to 0.0.0.0 can reconstruct request.url with that bind address.
 export function requestOrigin(request: Request, development = process.env.NODE_ENV !== "production") {
@@ -14,6 +15,9 @@ export function requestHasSameOrigin(request: Request, development = process.env
     const origin = new URL(raw), destination = new URL(request.url);
     if (origin.origin !== raw || !["http:", "https:"].includes(origin.protocol)) return false;
     if (origin.origin === destination.origin) return true;
+    // Explicit, locally configured temporary tunnel only; never trust arbitrary forwarding headers.
+    const publicOrigin=readWalk<{origin?:string}>("settings")?.origin;
+    if(publicOrigin&&origin.origin===publicOrigin&&origin.protocol==="https:"&&origin.host===request.headers.get("host"))return true;
     // Keep the production comparison strict. No forwarded-host trust or wildcards.
     return development && ["0.0.0.0", "[::]"].includes(destination.hostname) && origin.protocol === destination.protocol && origin.host === request.headers.get("host");
   } catch { return false; }

@@ -1,0 +1,16 @@
+import {it,expect} from 'vitest';
+import {advance,initialState,type WalkConfig} from '../../lib/walk/engine';
+const base=1795770000000;
+const c:WalkConfig={enabled:true,session:'session',vehicleId:'v',ownerId:'o',office:'GJ-21',registration:'DEMO',recipient:'1',sender:'2',origin:'https://example.com',token:'secret',expiresAt:base+9999999,startedAt:base,lat:23,lng:72,radiusM:50,returnSeconds:180,parkSeconds:180,rate:12};
+function point(t:number,lat=23.001,state='Moving',accuracy=5){return {eventAt:new Date(t).toISOString(),heartbeat:new Date(t).toISOString(),gpsAt:new Date(t).toISOString(),lat,lng:72,accuracy,locationSource:'PHONE_BROWSER',gpsStatus:'Phone-provided location',phoneLocationSession:{expiresAt:t+60000},imu:{state,accelerationG:state==='Moving'?.2:.01,rotationDps:state==='Moving'?25:0,movementId:'motion1',movementAt:base}};}
+it('requires two fixes, emits one exit, confirms return and five quiet seconds',()=>{const s=initialState(c);advance(s,c,point(base),base);expect(s.phase).toBe('armed');advance(s,c,point(base+3000),base+3000);expect(s.phase).toBe('outside');advance(s,c,point(base+6000),base+6000);expect(s.events.filter(e=>e.kind==='exit')).toHaveLength(1);advance(s,c,point(base+9000,23),base+9000);advance(s,c,point(base+12000,23,'Stationary'),base+12000);expect(s.phase).toBe('returning');advance(s,c,point(base+15000,23,'Stationary'),base+15000);expect(s.phase).toBe('returning');advance(s,c,point(base+18000,23,'Stationary'),base+18000);expect(s.phase).toBe('parked');expect(s.deadline).toBeUndefined();expect(s.events.filter(e=>e.kind==='movement')).toHaveLength(1);});
+it('does not infer exit from inaccurate GPS and pauses timers on lost watch',()=>{const s=initialState(c);advance(s,c,point(base,23.001,'Moving',60),base);advance(s,c,point(base+3000,23.001,'Moving',60),base+3000);expect(s.phase).toBe('armed');advance(s,c,point(base+6000),base+6000);advance(s,c,point(base+9000),base+9000);const deadline=s.deadline!;advance(s,c,{...point(base+12000),eventAt:new Date(base-30000).toISOString()},base+12000);expect(s.deadline).toBe(deadline+3000);});
+it('preserves boundary uncertainty and suppresses GPS jumps and repeated handling alerts',()=>{const s=initialState(c);for(let i=0;i<5;i++)advance(s,c,{...point(base+i*3000,23.00045),imu:{...point(base).imu,handling:true}},base+i*3000);expect(s.phase).toBe('armed');expect(s.events.filter(e=>e.kind==='handling')).toHaveLength(1);advance(s,c,point(base+15000,24),base+15000);expect(s.distanceM).toBe(0);});
+it('starts an illustrative assessment only after allowance, pauses restart gaps, and requires fresh quiet readings',()=>{
+ const short={...c,returnSeconds:6};const s=initialState(short);
+ advance(s,short,point(base),base);advance(s,short,point(base+3000),base+3000);
+ advance(s,short,point(base+6000),base+6000);expect(s.timerExpired).not.toBe(true);
+ advance(s,short,point(base+9000),base+9000);expect(s.timerExpired).toBe(true);expect(s.events.filter(e=>e.kind==='deadline')).toHaveLength(1);
+ advance(s,short,point(base+12000,23.0011),base+12000);expect(s.estimate).toBeGreaterThan(0);
+ const deadline=s.deadline!;advance(s,short,point(base+40000,23.0011),base+40000);expect(s.deadline).toBe(deadline+28000);
+});
