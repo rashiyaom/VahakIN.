@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { fencePolygon, type GeofenceConfig } from "@/lib/monitoring";
 import type { Map as MapInstance, Marker, StyleSpecification } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
-export interface MapVehicle { locationSource?:string; geofenceConfig?:GeofenceConfig; id:string; registration:string; lat:number|null; lng:number|null; monitoring:string; gpsAt:string|null; locationStatus?:string; }
+export interface MapVehicle { scenario?:string; warning?:boolean; locationSource?:string; geofenceConfig?:GeofenceConfig; id:string; registration:string; lat:number|null; lng:number|null; monitoring:string; gpsAt:string|null; locationStatus?:string; }
 type View = "streets" | "satellite" | "hybrid";
 const imageryKey = process.env.NEXT_PUBLIC_MAPTILER_KEY?.trim();
 const streets = "https://tiles.openfreemap.org/styles/liberty";
@@ -14,7 +14,7 @@ function styleFor(view: View): string | StyleSpecification {
   return { version: 8, sources: { imagery: { type: "raster", url: `https://api.maptiler.com/tiles/satellite-v4/tiles.json?key=${key}`, tileSize: 256, attribution: '<a href="https://www.maptiler.com/copyright/" target="_blank" rel="noopener">© MapTiler</a>' } }, layers: [{ id: "imagery", type: "raster", source: "imagery" }] };
 }
 const validPoint = (v: MapVehicle) => v.lat !== null && v.lng !== null && Number.isFinite(v.lat) && Number.isFinite(v.lng) && Math.abs(v.lat) <= 90 && Math.abs(v.lng) <= 180;
-export function MonitoringMap({vehicles,onSelect,demo=false}:{vehicles:MapVehicle[];onSelect:(id:string)=>void;demo?:boolean}) {
+export function MonitoringMap({vehicles,onSelect,demo=false,route}:{vehicles:MapVehicle[];onSelect:(id:string)=>void;demo?:boolean;route?:[number,number][]}) {
   const container=useRef<HTMLDivElement>(null), map=useRef<MapInstance|null>(null), markers=useRef<Marker[]>([]), select=useRef(onSelect), latest=useRef(vehicles), fitted=useRef(false);
   const [view,setView]=useState<View>("streets"),[tilted,setTilted]=useState(false),[ready,setReady]=useState(false),[error,setError]=useState(false),[attempt,setAttempt]=useState(0),[revision,setRevision]=useState(0);
   const currentView=useRef(view), currentTilt=useRef(tilted);
@@ -25,7 +25,8 @@ export function MonitoringMap({vehicles,onSelect,demo=false}:{vehicles:MapVehicl
   function fitVehicles() {
     const instance=map.current,points=latest.current.filter(validPoint);if(!instance)return;
     if(!points.length){instance.easeTo({center:[70.8022,22.3039],zoom:11});return;}
-    const xs=points.map(v=>v.lng!),ys=points.map(v=>v.lat!);
+    const bounds=points.flatMap(v=>[[v.lng!,v.lat!],...(v.geofenceConfig?.enabled?fencePolygon(v.geofenceConfig):[])]);
+    const xs=bounds.map(p=>p[0]),ys=bounds.map(p=>p[1]);
     instance.fitBounds([[Math.min(...xs),Math.min(...ys)],[Math.max(...xs),Math.max(...ys)]],{padding:65,maxZoom:15,duration:0});
   }
   useEffect(()=>{
@@ -53,6 +54,8 @@ export function MonitoringMap({vehicles,onSelect,demo=false}:{vehicles:MapVehicl
       markers.current.forEach(m=>m.remove());markers.current=[];
       for(const vehicle of vehicles.filter(validPoint)){
         const button=document.createElement("button");button.type="button";button.className=`vehicle-marker ${(vehicle.locationStatus??vehicle.monitoring)!=="Current"?"stale":""}`;
+        button.title=`${vehicle.registration} · ${vehicle.scenario??vehicle.locationStatus??vehicle.monitoring}`;
+        if(vehicle.warning)button.style.backgroundColor="#dc453b";
         button.setAttribute("aria-label",`${vehicle.registration}: ${vehicle.locationStatus??vehicle.monitoring} ${vehicle.locationSource==="PHONE_BROWSER"?"phone-provided":"device"} location`);
         button.addEventListener("click",()=>select.current(vehicle.id));
         markers.current.push(new lib.Marker({element:button}).setLngLat([vehicle.lng!,vehicle.lat!]).addTo(map.current));
@@ -69,8 +72,17 @@ export function MonitoringMap({vehicles,onSelect,demo=false}:{vehicles:MapVehicl
       instance.addLayer({id:"parking-fence-fill",type:"fill",source:"parking-fences",paint:{"fill-color":"#128c87","fill-opacity":0.13}});
       instance.addLayer({id:"parking-fence-line",type:"line",source:"parking-fences",paint:{"line-color":"#128c87","line-width":2,"line-dasharray":[3,2]}});
     }
-    if(!fitted.current&&data.features.length){const f=vehicles.find(v=>v.geofenceConfig?.enabled)!.geofenceConfig!;instance.fitBounds([[f.lng-f.radiusM/85000,f.lat-f.radiusM/110000],[f.lng+f.radiusM/85000,f.lat+f.radiusM/110000]],{padding:80,maxZoom:16,duration:0});fitted.current=true;}
+    if(!fitted.current&&data.features.length&&vehicles.some(validPoint)){fitVehicles();fitted.current=true;}
   },[vehicles,ready,revision]);
+  useEffect(()=>{
+    const instance=map.current;if(!ready||!instance?.isStyleLoaded())return;
+    const data:GeoJSON.FeatureCollection={type:"FeatureCollection",features:route&&route.length>1?[{type:"Feature",properties:{},geometry:{type:"LineString",coordinates:route}}]:[]};
+    const source=instance.getSource("demo-journey") as import("maplibre-gl").GeoJSONSource|undefined;
+    if(source)source.setData(data);else{
+      instance.addSource("demo-journey",{type:"geojson",data});
+      instance.addLayer({id:"demo-journey-line",type:"line",source:"demo-journey",paint:{"line-color":"#e77927","line-width":4,"line-dasharray":[2,1]}});
+    }
+  },[route,ready,revision]);
   function switchView(next:View){
     if(next===view||!map.current)return;
     currentView.current=next;setView(next);setReady(false);setError(false);map.current.setStyle(styleFor(next));
@@ -90,7 +102,7 @@ export function MonitoringMap({vehicles,onSelect,demo=false}:{vehicles:MapVehicl
     {error&&<div className="map-load-notice" role="status"><span>Some map detail could not load.</span><button type="button" onClick={()=>{setReady(false);setError(false);setAttempt(n=>n+1);}}>Retry</button>{view!=="streets"&&<button type="button" onClick={()=>switchView("streets")}>Use streets</button>}</div>}
     {!ready&&!error&&<div className="map-load-notice" role="status">Loading map…</div>}
     <div className="map-info"><span>{demo?"Demo vehicle markers":"Authorized vehicle locations"}</span>{view!=="streets"?<small>Satellite imagery is not live video.</small>:tilted?<small>Building heights appear where mapped. Zoom in for detail.</small>:!imageryKey?<small>Satellite imagery is not available yet.</small>:null}</div>
-    <div className="map-legend"><span><i/>Current</span><span><i className="stale"/>Last known</span><span>Dashed circle: parking geofence</span>{vehicles.some(v=>v.locationSource==="PHONE_BROWSER")&&<span>Plus location: owner’s phone</span>}{!vehicles.some(validPoint)&&<small>No vehicle coordinates yet · exploring Rajkot</small>}</div>
+    <div className="map-legend"><span><i/>Current</span><span><i className="stale"/>Last known</span><span>Dashed circle: parking geofence</span>{demo&&<span>Red: warning · Orange line: selected seeded journey</span>}{vehicles.some(v=>v.locationSource==="PHONE_BROWSER")&&<span>Plus location: owner’s phone</span>}{!vehicles.some(validPoint)&&<small>No vehicle coordinates yet · exploring Rajkot</small>}</div>
     {view!=="streets"&&<a className="map-provider-credit" href="https://www.maptiler.com/" target="_blank" rel="noreferrer">MapTiler</a>}
   </div>;
 }

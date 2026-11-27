@@ -1,0 +1,6 @@
+import {it,expect} from 'vitest';
+import {seedOwnerDemonstration} from '../../lib/server/owner-demo-seed';
+import type {DemoStore} from '../../lib/server/demo-store';
+function fixture(){return {accounts:[{id:'demo-owner',name:'Priya Shah'}],vehicles:Array.from({length:9},(_,i)=>({id:`v-${String(i+1).padStart(3,'0')}`,source:'MOCK',ownerId:'other'})),requests:[]} as unknown as DemoStore;}
+it('upgrades only eight mock vehicles, preserves request edits and is idempotent',()=>{const s=fixture();expect(seedOwnerDemonstration(s)).toBe(true);expect(s.vehicles.filter(v=>v.ownerId==='demo-owner')).toHaveLength(8);expect(s.vehicles[8].ownerId).toBe('other');expect(s.requests.map(r=>r.status)).toEqual(['Submitted','Under review','Approved','Rejected']);s.requests[0].status='Under review';expect(seedOwnerDemonstration(s)).toBe(false);expect(s.requests).toHaveLength(4);expect(s.requests[0].status).toBe('Under review');});
+it('never seeds live stores or reassigns real records',()=>{const live=fixture();live.mode='live';expect(seedOwnerDemonstration(live)).toBe(false);expect(live.requests).toHaveLength(0);const s=fixture();s.vehicles[0].source='MANUAL';seedOwnerDemonstration(s);expect(s.vehicles[0].ownerId).toBe('other');});
