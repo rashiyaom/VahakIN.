@@ -6,6 +6,7 @@ import "@/styles/dashboard-reference.css";
 import "@/styles/tax-compliance.css";
 import "@/styles/theme.css";
 import "@/styles/enrollment.css";
+import "@/styles/vahan-ai.css";
 import { MotionProvider } from "@/components/layout/MotionProvider";
 
 export const metadata: Metadata = {

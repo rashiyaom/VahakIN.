@@ -1,0 +1,8 @@
+.env*
+.provisioned/
+.data/
+.local-https/
+node_modules/
+.next*/
+test-results*/
+playwright-report/

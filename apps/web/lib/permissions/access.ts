@@ -39,6 +39,7 @@ export function inJurisdiction(account:Account,record:ScopedRecord){
 }
 export const navigation = [
  {id:"overview",label:"Overview",permission:"summary.read",group:"Workspace"},
+ {id:"vahan-ai",label:"VAHAN AI",permission:"summary.read",group:"Workspace"},
  {id:"states",label:"States & territories",permission:"states.read",group:"Workspace"},
  {id:"offices",label:"RTO offices",permission:"offices.read",group:"Workspace"},
  {id:"applications",label:"Applications",permission:"applications.read",group:"Workspace"},

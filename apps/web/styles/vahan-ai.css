@@ -1,0 +1,590 @@
+/* VAHAN AI Styles — Seamless Dark & Light Mode integration with VahakIN theme */
+.vahan-ai-workspace {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+  animation: vahanFadeIn 0.35s ease;
+}
+
+@keyframes vahanFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Persona & Security Banner */
+.vahan-identity-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 12px 18px;
+  background: var(--ref-soft, #f1f5f9);
+  border: 1px solid var(--ref-border, #e2e8f0);
+  border-radius: 16px;
+  font-size: 12px;
+}
+
+.vahan-identity-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.vahan-role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  background: var(--ref-charcoal, #1e293b);
+  color: #fff;
+}
+
+.vahan-identity-meta {
+  color: var(--text-muted, #64748b);
+  font-size: 11px;
+}
+
+.vahan-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 9px;
+  border-radius: 12px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.vahan-status-pill.idle { background: #e2e8f0; color: #475569; }
+.vahan-status-pill.connecting { background: #fef08a; color: #854d0e; }
+.vahan-status-pill.connected { background: #bbf7d0; color: #166534; }
+.vahan-status-pill.ended { background: #fecaca; color: #991b1b; }
+
+/* Video Embed Card */
+.vahan-embed-card {
+  background: var(--bg-surface, #ffffff);
+  border: 1px solid var(--ref-border, #e2e8f0);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
+}
+
+.vahan-embed-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--ref-border, #e2e8f0);
+  background: var(--ref-canvas, #fafafa);
+}
+
+.vahan-embed-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-ink, #0f172a);
+}
+
+.vahan-embed-notice {
+  font-size: 11px;
+  color: var(--text-muted, #64748b);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Tavus Embed Container (definitely sized parent) */
+.vahan-embed-viewport {
+  width: 100%;
+  max-width: 1040px;
+  margin: 0 auto;
+  aspect-ratio: 16 / 9;
+  background: #0b1319;
+  position: relative;
+}
+
+@media (max-width: 768px) {
+  .vahan-embed-viewport {
+    aspect-ratio: 9 / 16;
+  }
+}
+
+/* Quick Prompt Chips */
+.vahan-prompts-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px 20px;
+  background: var(--ref-soft, #f8fafc);
+  border-top: 1px solid var(--ref-border, #e2e8f0);
+}
+
+.vahan-prompts-title {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--text-muted, #64748b);
+}
+
+.vahan-chips-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.vahan-chip-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 13px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 500;
+  border: 1px solid var(--ref-border, #cbd5e1);
+  background: var(--bg-surface, #ffffff);
+  color: var(--text-ink, #1e293b);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.vahan-chip-btn:hover {
+  background: var(--ref-lime, #ceee88);
+  border-color: var(--ref-lime, #ceee88);
+  color: #1a3423;
+  transform: translateY(-1px);
+}
+
+/* Dynamic Chart Container */
+.vahan-chart-container {
+  background: var(--bg-surface, #ffffff);
+  border: 1px solid var(--ref-border, #e2e8f0);
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+}
+
+.vahan-chart-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  gap: 16px;
+}
+
+.vahan-chart-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: #15803d;
+  background: #dcfce7;
+  padding: 3px 8px;
+  border-radius: 12px;
+  margin-bottom: 6px;
+}
+
+.vahan-chart-title {
+  font-size: 19px;
+  font-weight: 600;
+  color: var(--text-ink, #0f172a);
+  margin: 0 0 4px;
+  letter-spacing: -0.3px;
+}
+
+.vahan-chart-desc {
+  font-size: 12px;
+  color: var(--text-muted, #64748b);
+  margin: 0;
+}
+
+.vahan-chart-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.vahan-btn-subtle {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--ref-border, #cbd5e1);
+  background: transparent;
+  color: var(--text-muted, #64748b);
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.vahan-btn-subtle:hover {
+  background: var(--ref-soft, #f1f5f9);
+  color: var(--text-ink, #0f172a);
+}
+
+.vahan-chart-stage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 250px;
+  padding: 20px 10px;
+  position: relative;
+}
+
+/* Donut Chart */
+.vahan-donut-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vahan-donut-svg {
+  display: block;
+}
+
+.vahan-donut-center {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  pointer-events: none;
+}
+
+.vahan-donut-hover-label,
+.vahan-donut-total-label {
+  font-size: 11px;
+  color: var(--text-muted, #64748b);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.vahan-donut-hover-val,
+.vahan-donut-total-val {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--text-ink, #0f172a);
+  line-height: 1.1;
+  margin: 2px 0;
+}
+
+.vahan-donut-hover-sub,
+.vahan-donut-total-sub {
+  font-size: 10px;
+  color: #16a34a;
+  font-weight: 600;
+}
+
+/* Bar Chart */
+.vahan-bars-wrap {
+  width: 100%;
+  max-width: 700px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.vahan-bar-row {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.vahan-bar-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+}
+
+.vahan-bar-label {
+  color: var(--text-ink, #1e293b);
+  font-weight: 500;
+}
+
+.vahan-bar-num {
+  color: var(--text-ink, #0f172a);
+}
+
+.vahan-bar-track {
+  height: 9px;
+  background: var(--ref-border, #e2e8f0);
+  border-radius: 9px;
+  overflow: hidden;
+}
+
+.vahan-bar-fill {
+  height: 100%;
+  border-radius: 9px;
+  transition: width 0.45s ease;
+}
+
+/* Line Chart */
+.vahan-line-wrap {
+  width: 100%;
+  max-width: 700px;
+  position: relative;
+}
+
+.vahan-line-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.vahan-line-tooltip {
+  position: absolute;
+  transform: translate(-50%, -120%);
+  background: #0f172a;
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 10px;
+  pointer-events: none;
+  white-space: nowrap;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Metric Grid */
+.vahan-grid-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+  width: 100%;
+}
+
+.vahan-metric-card {
+  padding: 16px;
+  background: var(--ref-canvas, #fafafa);
+  border: 1px solid var(--ref-border, #e2e8f0);
+  border-top-width: 4px;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.vahan-metric-label {
+  font-size: 11px;
+  color: var(--text-muted, #64748b);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.vahan-metric-val {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.vahan-metric-unit {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted, #64748b);
+}
+
+.vahan-metric-desc {
+  font-size: 10px;
+  color: var(--text-muted, #64748b);
+  margin: 4px 0 0;
+}
+
+/* Diagram / Flow Steps */
+.vahan-diagram-flow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  width: 100%;
+}
+
+.vahan-flow-step {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.vahan-step-node {
+  padding: 14px 18px;
+  background: var(--ref-canvas, #fafafa);
+  border: 2px solid;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 140px;
+  position: relative;
+}
+
+.vahan-step-idx {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+  position: absolute;
+  top: -8px;
+  left: 10px;
+}
+
+.vahan-step-title {
+  font-size: 12px;
+  color: var(--text-ink, #0f172a);
+}
+
+.vahan-step-val {
+  font-size: 13px;
+  font-weight: 700;
+  color: #16a34a;
+}
+
+.vahan-step-desc {
+  font-size: 9px;
+  color: var(--text-muted, #64748b);
+  margin: 0;
+}
+
+.vahan-step-arrow {
+  font-size: 18px;
+  color: var(--text-muted, #94a3b8);
+  font-weight: bold;
+}
+
+/* Legend items */
+.vahan-chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--ref-border, #e2e8f0);
+}
+
+.vahan-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  cursor: pointer;
+  padding: 3px 6px;
+  border-radius: 6px;
+  transition: background 0.15s ease;
+}
+
+.vahan-legend-item:hover,
+.vahan-legend-item.is-hovered {
+  background: var(--ref-soft, #f1f5f9);
+}
+
+.vahan-legend-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.vahan-legend-label {
+  color: var(--text-muted, #475569);
+}
+
+.vahan-legend-val {
+  color: var(--text-ink, #0f172a);
+}
+
+.vahan-legend-pct {
+  color: var(--text-muted, #64748b);
+}
+
+/* Dark Mode Overrides */
+html[data-theme="dark"] .vahan-ai-workspace {
+  --ref-canvas: #121d1b;
+  --ref-soft: #192724;
+  --ref-border: #283d38;
+}
+
+html[data-theme="dark"] .vahan-identity-strip {
+  background: #182724;
+  border-color: #2b403a;
+}
+
+html[data-theme="dark"] .vahan-role-badge {
+  background: #2b4038;
+  color: #b9dfae;
+}
+
+html[data-theme="dark"] .vahan-embed-card,
+html[data-theme="dark"] .vahan-chart-container {
+  background: #162421;
+  border-color: #2b3f3a;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+html[data-theme="dark"] .vahan-embed-topbar {
+  background: #14201e;
+  border-bottom-color: #2b3f3a;
+}
+
+html[data-theme="dark"] .vahan-embed-title,
+html[data-theme="dark"] .vahan-chart-title,
+html[data-theme="dark"] .vahan-bar-label,
+html[data-theme="dark"] .vahan-bar-num,
+html[data-theme="dark"] .vahan-donut-hover-val,
+html[data-theme="dark"] .vahan-donut-total-val,
+html[data-theme="dark"] .vahan-legend-val,
+html[data-theme="dark"] .vahan-step-title {
+  color: #e4eeea;
+}
+
+html[data-theme="dark"] .vahan-prompts-bar {
+  background: #121c1a;
+  border-top-color: #2b3f3a;
+}
+
+html[data-theme="dark"] .vahan-chip-btn {
+  background: #1a2a26;
+  border-color: #354e47;
+  color: #d1e2db;
+}
+
+html[data-theme="dark"] .vahan-chip-btn:hover {
+  background: #2b463e;
+  border-color: #8ed9bf;
+  color: #e4eeea;
+}
+
+html[data-theme="dark"] .vahan-metric-card,
+html[data-theme="dark"] .vahan-step-node {
+  background: #1a2b27;
+  border-color: #334d46;
+}
+
+html[data-theme="dark"] .vahan-legend-item:hover,
+html[data-theme="dark"] .vahan-legend-item.is-hovered {
+  background: #223732;
+}
+
+html[data-theme="dark"] .vahan-btn-subtle {
+  border-color: #334d46;
+  color: #a3bbb2;
+}
+
+html[data-theme="dark"] .vahan-btn-subtle:hover {
+  background: #213530;
+  color: #e4eeea;
+}

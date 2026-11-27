@@ -19,7 +19,7 @@ class MotionDetector {
       lastX=ax;lastY=ay;lastZ=az;
       if(!still) { calibrationCount=0;bx=by=bz=0;return false; }
       bx+=gx;by+=gy;bz+=gz;
-      if(++calibrationCount>=250) {bx/=250;by/=250;bz/=250;gravityX=ax;gravityY=ay;gravityZ=az;state=Stationary;}
+      if(++calibrationCount>=calibrationTarget) {bx/=calibrationTarget;by/=calibrationTarget;bz/=calibrationTarget;gravityX=ax;gravityY=ay;gravityZ=az;state=Stationary;}
       return false;
     }
     // Track slow gravity changes. The gyro separately detects sustained rotation.
@@ -37,7 +37,15 @@ class MotionDetector {
     return event;
   }
   void reset(){state=Calibrating;calibrationCount=activeCount=index=filled=quietSamples=0;bx=by=bz=0;accelerationG=rotationDps=0;qualifiedMs=0;for(auto &v:window)v=false;}
+  void setCalibrationSamples(uint16_t samples){calibrationTarget=samples<50?50:samples;reset();}
+  // Preserve stationary calibration, but never count time asleep as motion evidence.
+  void resumeAfterSleep(){
+    if(state==Calibrating||state==Fault){reset();return;}
+    state=Stationary;activeCount=index=filled=quietSamples=0;
+    accelerationG=rotationDps=0;qualifiedMs=0;for(auto &v:window)v=false;
+  }
  private:
+  uint16_t calibrationTarget=250;
   bool window[100]={};int calibrationCount=0,activeCount=0,index=0,filled=0,quietSamples=0;
   float bx=0,by=0,bz=0,gravityX=0,gravityY=0,gravityZ=1,lastX=0,lastY=0,lastZ=1;
 };

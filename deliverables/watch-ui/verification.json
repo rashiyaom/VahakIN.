@@ -1,0 +1,43 @@
+{
+  "date": "2026-11-27",
+  "board": "Waveshare ESP32-S3-Touch-AMOLED-2.06",
+  "resolution": [
+    410,
+    502
+  ],
+  "usbInspection": {
+    "chip": "ESP32-S3 revision 0.2",
+    "flashMB": 32,
+    "psramMB": 8
+  },
+  "firmware": {
+    "framework": "Arduino-ESP32 3.3.11",
+    "ui": "LVGL 9.3.0",
+    "flashed": false,
+    "compile": "passed",
+    "programBytes": 1664259,
+    "staticRamBytes": 51504,
+    "sha256": "451b07f676954a5bd05f47bf18ef65a0f5faddfaa74060e5b7e0f0376ed603ae"
+  },
+  "checks": {
+    "typescript": "passed",
+    "websiteTargetedTests": 24,
+    "motionHostTests": "passed",
+    "nativeLvglRender": "7 screens passed",
+    "browserPreview": "pan, recenter, five-second timeout, motion wake, mobile overflow passed",
+    "gitDiffCheck": "passed"
+  },
+  "hardwarePending": [
+    "physical display/touch",
+    "motion interrupt wake",
+    "battery current",
+    "hotspot telemetry and owner-phone GPS end to end"
+  ],
+  "location": {
+    "venue": "Mahatma Mandir, Gandhinagar",
+    "label": "Gate 7 / Auditorium",
+    "marker": "approximate presentation placement",
+    "map": "379 OSM road/building paths",
+    "liveSource": "owner-shared phone location through authenticated telemetry response"
+  }
+}

@@ -122,7 +122,11 @@ void parseNmea(){
 }
 void readGps(){
  while(gpsSerial.available()){
-  char c=gpsSerial.read();if(c=='$'){nmeaLength=0;receiving=true;}
+  char c=gpsSerial.read();
+  #ifdef VAHAKIN_GPS_BYTE
+  VAHAKIN_GPS_BYTE(c);
+  #endif
+  if(c=='$'){nmeaLength=0;receiving=true;}
   if(!receiving)continue;
   if(c=='\r'||c=='\n'){if(nmeaLength){nmea[nmeaLength]=0;parseNmea();}receiving=false;continue;}
   if(nmeaLength>=sizeof(nmea)-1){receiving=false;nmeaLength=0;continue;}nmea[nmeaLength++]=c;
@@ -191,13 +195,24 @@ void setup(){
  if(preferences.getBytesLength("events")==sizeof(data)&&preferences.getBytes("events",&data,sizeof(data))==sizeof(data)&&data.magic==0x56414831&&data.count<=8){eventCount=data.count;memcpy(events,data.items,sizeof(events));}
  WiFi.persistent(false);WiFi.mode(WIFI_STA);WiFi.setSleep(false);WiFi.setAutoReconnect(true);WiFi.begin(WIFI_SSID,WIFI_PASSWORD);
  configTime(0,0,"pool.ntp.org","time.google.com");
+ #ifndef VAHAKIN_EXTERNAL_SENSOR
  if(xTaskCreatePinnedToCore(sensorTask,"imu-gps",6144,nullptr,2,nullptr,1)!=pdPASS){Serial.println("Sensor task could not start");for(;;)delay(1000);}
+ #endif
+ #ifndef VAHAKIN_EXTERNAL_SENSOR
  Serial.println("VahakIN hardware demo: keep the dashboard device still for 5 seconds. No cellular transport.");
+ #endif
 }
 void loop(){
  static uint32_t lastConnect=0,lastUpload=0,retryDelay=UPLOAD_MS,lastDiagnostic=0;
  static String pending="",pendingNonce="",pendingMovement="";static int64_t pendingAt=0;
- persistEvents();uint32_t now=millis();
+ #ifndef VAHAKIN_EXTERNAL_SENSOR
+ persistEvents();
+ #endif
+ uint32_t now=millis();
+ #ifdef VAHAKIN_EXTERNAL_SENSOR
+ // A motion-woken watch gets a short network window before returning to sleep.
+ static bool first=true;if(first){lastUpload=now-UPLOAD_MS;first=false;}
+ #endif
  if(now-lastDiagnostic>=10000){lastDiagnostic=now;Snapshot s;uint32_t dropped;uint8_t queued;portENTER_CRITICAL(&sharedMux);s=shared;dropped=droppedEvents;queued=eventCount;portEXIT_CRITICAL(&sharedMux);Serial.printf("WiFi=%s IMU=%d dynamic=%.3fg rotation=%.1fdps GPS=%s queued=%u lost=%lu clock=%s\n",WiFi.status()==WL_CONNECTED?"online":"offline",int(s.state),s.acceleration,s.rotation,s.gpsAt&&now-s.gpsMillis<10000?"fresh":"unavailable",queued,(unsigned long)dropped,clockReady()?"ready":"waiting");}
  if(WiFi.status()!=WL_CONNECTED){if(now-lastConnect>=15000){lastConnect=now;WiFi.reconnect();}delay(20);return;}
  if(!clockReady()||now-lastUpload<retryDelay){delay(20);return;}
@@ -224,7 +239,12 @@ void loop(){
  if(url.startsWith("https://")&&strlen(ROOT_CA)>0){secure.setCACert(ROOT_CA);begun=http.begin(secure,url);}
  else if(ALLOW_LOCAL_HTTP&&localEndpoint(url))begun=http.begin(plain,url);
  if(!begun){Serial.println("Configure a private LAN HTTP endpoint or verified HTTPS CA.");retryDelay=60000;return;}
- http.setConnectTimeout(3000);http.setTimeout(4000);http.setFollowRedirects(HTTPC_DISABLE_FOLLOW_REDIRECTS);
+ #ifdef VAHAKIN_EXTERNAL_SENSOR
+ http.setConnectTimeout(1200);http.setTimeout(1500);
+ #else
+ http.setConnectTimeout(3000);http.setTimeout(4000);
+ #endif
+ http.setFollowRedirects(HTTPC_DISABLE_FOLLOW_REDIRECTS);
  http.addHeader("Content-Type","application/json");http.addHeader("x-vahakin-signature",signature(pending));
  int status=http.POST(pending);String response=status==200?http.getString():"";http.end();
  if(status==200&&response.indexOf(pendingNonce)>=0){
@@ -232,6 +252,9 @@ void loop(){
   if(eventCount&&pendingMovement==events[0].id){for(uint8_t i=1;i<eventCount;i++)events[i-1]=events[i];eventCount--;eventRevision++;}
   portEXIT_CRITICAL(&sharedMux);
   pending="";retryDelay=UPLOAD_MS;Serial.println("Telemetry acknowledged by website.");
+  #ifdef VAHAKIN_TELEMETRY_RESPONSE
+  VAHAKIN_TELEMETRY_RESPONSE(response);
+  #endif
  }else{retryDelay=status==401||status==409||status==429?60000:min(uint32_t(60000),retryDelay*2);Serial.printf("Upload status=%d; retry in %lu ms. Sensor sampling continues.\n",status,(unsigned long)retryDelay);}
  delay(20);
 }

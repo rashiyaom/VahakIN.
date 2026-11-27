@@ -4,6 +4,7 @@ import { boundedBody, enrollmentFailure } from "@/lib/server/enrollment-http";
 import { EnrollmentError } from "@/lib/server/enrollment";
 import { limitAttempts } from "@/lib/server/live-store";
 import { hardwareSchema, validHardwareSignature, applyHardwareReading } from "@/lib/server/hardware";
+import { watchView } from "@/lib/server/watch-view";
 export const runtime="nodejs";
 export async function POST(request:Request) {
   try {
@@ -25,7 +26,7 @@ export async function POST(request:Request) {
       const committed=await client.rpc("ig_commit_hardware",{p_expected:s.version,p_device:message.deviceId,p_nonce:message.nonce,p_event:message,p_vehicle:s.vehicle??null,p_alerts:alerts});
       if(committed.error?.code==="40001") continue;
       if(committed.error) throw new EnrollmentError(committed.error.code==="23505"?"Event identity conflict.":"Telemetry could not be recorded.",committed.error.code==="23505"?409:503);
-      return NextResponse.json({receivedAt:committed.data,deviceId:message.deviceId,nonce:message.nonce},{headers:{"Cache-Control":"no-store"}});
+      return NextResponse.json({receivedAt:committed.data,deviceId:message.deviceId,nonce:message.nonce,watch:plus?watchView(s.vehicle):null},{headers:{"Cache-Control":"no-store"}});
     }
     throw new EnrollmentError("Workspace busy. Retry the same packet.",503);
   } catch(error) { return enrollmentFailure(error); }

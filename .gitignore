@@ -73,3 +73,8 @@ firmware/plus_watch_demo/config.local.h
 firmware/plus_watch_demo/build/
 apps/web/.local-https/
 apps/web/.next-phone/
+
+# Watch builds contain private Wi-Fi and per-device signing credentials.
+firmware/vahakin_watch/config.local.h
+firmware/vahakin_watch/.private/
+deliverables/watch-ui/*.ppm

@@ -39,7 +39,7 @@ export function validateFields(f: EnrollmentFields, step?: number, today = india
     if (f.reasonDetails.trim().length < 15 || f.reasonDetails.length > 1000) e.reasonDetails = "Briefly explain the reason (15–1,000 characters).";
     if (f.parkingAddress.trim().length < 10 || f.parkingAddress.length > 500) e.parkingAddress = "Enter the full address where the vehicle will remain parked.";
     if (!/^[1-9]\d{5}$/.test(f.parkingPincode)) e.parkingPincode = "Enter a 6-digit parking PIN code.";
-    if (!routeOffice(f)) e.area = "This pilot accepts Rajkot city parking only. Other areas need office-assisted routing.";
+    if (!routeOffice(f)) e.area = "Select a supported Rajkot or Gandhinagar parking area. Other areas need office-assisted routing.";
     if ((f.latitude === "") !== (f.longitude === "")) e.latitude = "Provide both coordinates, or leave both blank.";
     if (f.latitude && (!Number.isFinite(+f.latitude) || +f.latitude < -90 || +f.latitude > 90)) e.latitude = "Latitude must be between −90 and 90.";
     if (f.longitude && (!Number.isFinite(+f.longitude) || +f.longitude < -180 || +f.longitude > 180)) e.longitude = "Longitude must be between −180 and 180.";

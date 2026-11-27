@@ -1,6 +1,10 @@
 # Hotspot MPU / GPS hardware demonstration
 
-This sketch targets ESP32-S3 with GY-521 / MPU-6050 and NEO-6M. It has **not been flashed**. Hardware thresholds need a stationary/bump/movement check on the actual mounted assembly before the presentation.
+This sketch targets ESP32-S3 with GY-521 / MPU-6050 and NEO-6M. It was flashed and flash-hash verified on 2026-11-27 on Basic MAC `28:84:85:be:53:7c` (8 MB flash), with the watch disconnected. Live testing confirmed the configured Basic identity. Wi-Fi initially connected and synchronized time, but telemetry uploads failed; subsequent connectivity was unstable. The I²C scan found zero devices on GPIO8/9 and GPS received zero bytes on GPIO16. Sensor operation, real location and backend delivery remain unverified pending wiring/power/network checks. Hardware thresholds still need a stationary/bump/movement check on the actual mounted assembly.
+
+Basic serial diagnostics at 115200 baud include its identity and label activation code, an I²C scan at startup, Wi-Fi IP/gateway, cumulative GPS byte count, periodic GGA sentences, and coordinates only when a fresh valid fix exists. The Wi-Fi password and signing secret are never printed.
+
+Follow-up test: scanning with SDA/SCL swapped also found zero devices; both original bus lines read high. The initial hotspot gave the board `10.164.19.190` while the laptop used `10.232.124.31` with a different gateway. After flashing the user's replacement network settings, the board reported Wi-Fi reason 201 (access point not found). Enable a visible 2.4 GHz network before retesting. Neither sensor passed a physical test; do not treat successful compilation/flash as sensor validation.
 
 ## Device label
 
@@ -29,7 +33,7 @@ The SIM800L, MPU INT, reed switches, SPDT inputs and voltage divider are not sam
 
 ## Laptop / hotspot setup
 
-1. Enable the configured **testing** phone hotspot in 2.4 GHz mode. Join this laptop to the same hotspot. The password is already saved privately.
+1. Enable the phone hotspot named in private `config.local.h` in 2.4 GHz mode. Join this laptop to that exact hotspot. The password is already saved privately.
 2. From `apps/web`, start the site using `node node_modules/next/dist/bin/next dev --hostname 0.0.0.0 --port 3000`. Keep the laptop awake. Supabase access needs internet through the hotspot.
 3. Once the laptop is on that hotspot, run `python3 tools/configure-hotspot-endpoint.py --port 3000` from the repository root. The IP can change when switching networks; repeat this before compiling/flashing. The current private config points at the laptop IP observed during implementation, not a promised future hotspot IP.
 4. Permit incoming local connections to Node if macOS Firewall requests it. The phone must allow connected clients to reach each other. `localhost` on the ESP would refer to the ESP itself and must never be used as the server address.

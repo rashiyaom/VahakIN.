@@ -7,6 +7,7 @@ export const governmentSources = [
 ];
 // Pilot service area, not a surveyed jurisdiction boundary or a distance lookup.
 export function routeOffice(fields: Pick<EnrollmentFields, "district" | "area">) {
+  if (fields.district === "Gandhinagar" && fields.area === "Gandhinagar city") return { code: "GJ-21", name: "Gandhinagar RTO", state: "Gujarat", basis: "Gandhinagar parking address · demonstration service area" };
   return fields.district === "Rajkot" && fields.area === "Rajkot city" ? { code: "GJ-03", name: "Rajkot RTO", state: "Gujarat", basis: "Rajkot city parking address · pilot service area" } : null;
 }
 export const documentLabels: Record<DocumentKind, string> = {
